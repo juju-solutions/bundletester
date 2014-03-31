@@ -1,0 +1,9 @@
+*.pyc
+dist/
+build/
+bundletester.egg-info/
+.coverage
+coverage.xml
+.venv
+.cover/
+.ropeproject/
