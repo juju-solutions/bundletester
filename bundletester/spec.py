@@ -3,6 +3,13 @@ import os
 from bundletester import config
 
 
+def normalize_path(path, relto):
+    dirname = os.path.dirname(relto)
+    if not os.path.isabs(path):
+        path = os.path.join(dirname, path)
+    return path
+
+
 def loader(testfile, parent=None):
     result = config.Parser()
     if not os.path.exists(testfile) or \
@@ -12,18 +19,20 @@ def loader(testfile, parent=None):
     result['name'] = os.path.basename(testfile)
     result['executable'] = os.path.abspath(testfile)
 
-    base, ext = os.path.splitext(testfile)
+    base, ext = os.path.splitext(result['executable'])
     control_file = "%s.yaml" % base
     if not os.path.exists(control_file):
         control_file = None
-    result['config'] = config.Parser(path=control_file, parent=parent)
+    result = config.Parser(path=control_file, parent=parent)
+    result['name'] = os.path.basename(testfile)
+    result['executable'] = os.path.abspath(testfile)
+    if result.bundle:
+        result.bundle = normalize_path(result.bundle, result.executable)
     return result
 
 
-class Spec(config.Parser):
-    def __init__(self, testfile, parent):
-        data = loader(testfile, parent)
-        self.update(data)
+def Spec(testfile, parent):
+    return loader(testfile, parent)
 
 
 class Suite(list):

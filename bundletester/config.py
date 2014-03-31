@@ -6,7 +6,7 @@ class Parser(dict):
         return {
             'bootstrap': True,
             'reset': True,
-            'bundle': 'bundle.yaml',
+            'bundle': None,
             'virtualenv': True,
             'sources': [],
             'packages': [],

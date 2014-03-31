@@ -22,14 +22,14 @@ class TestLoader(unittest.TestCase):
         self.assertEqual(test.name, os.path.basename(locate('test01')))
         self.assertEqual(test.executable, os.path.abspath(locate('test01')))
         # Verify we got a default config file representation
-        self.assertEqual(test.config.virtualenv, True)
+        self.assertEqual(test.virtualenv, True)
 
     def test_loader_config(self):
         test = spec.loader(locate('test02'))
         self.assertEqual(test.name, 'test02')
         self.assertEqual(test.executable, os.path.abspath(locate('test02')))
         # Verify we got a default config file representation
-        self.assertEqual(test.config.setup, ['setup02'])
+        self.assertEqual(test.setup, ['setup02'])
 
     def test_loader_config_parent(self):
         parent = config.Parser()
@@ -37,9 +37,9 @@ class TestLoader(unittest.TestCase):
         test = spec.loader(locate('test02'), parent)
         self.assertEqual(test.name, 'test02')
         self.assertEqual(test.executable, os.path.abspath(locate('test02')))
-        self.assertEqual(test.config.setup,  ['setup02'])
-        self.assertEqual(test.config.bootstrap,  False)
-        self.assertEqual(test.config.reset,  True)
+        self.assertEqual(test.setup,  ['setup02'])
+        self.assertEqual(test.bootstrap,  False)
+        self.assertEqual(test.reset,  True)
 
     def test_spec_init(self):
         parent = config.Parser()

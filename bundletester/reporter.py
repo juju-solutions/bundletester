@@ -3,7 +3,7 @@ import sys
 
 
 class Reporter(object):
-    responses = {
+    status_flags = {
         0: 'PASS',
         -1: 'ERROR',
         1: 'ERROR',
@@ -27,8 +27,10 @@ class Reporter(object):
             ec = m['returncode']
             ec_ct = by_code.get(ec,  0)
             by_code[ec] = ec_ct + 1
+
+        self.fp.write('\n')
         for ec, ct in by_code.items():
-            self.fp.write("%s: %s " % (self.responses.get(ec), ct))
+            self.fp.write("%s: %s " % (self.status_flags.get(ec), ct))
         self.fp.write("Total: %s (%s sec)\n" % (
             len(self.messages), total_seconds))
 

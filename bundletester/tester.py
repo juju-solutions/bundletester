@@ -2,13 +2,14 @@ import argparse
 import logging
 import os
 import subprocess
+import sys
+
 from bundletester import (config, builder, spec,
                           runner, reporter)
 
 
 def current_environment():
     return subprocess.check_output(['juju', 'switch']).strip()
-
 
 
 def validate():
@@ -22,6 +23,7 @@ def main():
     parser.add_argument('-e', '--environment')
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
+    parser.add_argument('-o', '--output', dest="output")
     parser.add_argument('--dot', action="store_true")
     parser.add_argument('--testdir')
     parser.add_argument('tests', nargs="*")
@@ -33,6 +35,7 @@ def main():
 
     validate()
 
+    # Hidden from nose
     def find_test_dir(testdir):
         if not testdir:
             if os.path.exists('tests'):
@@ -60,10 +63,14 @@ def main():
     env.add_sources(testcfg.sources)
     env.install_packages()
 
-    if options.dot:
-        report = reporter.DotReporter()
+    if isinstance(options.output, str):
+        fp = open(options.output, 'w')
     else:
-        report = reporter.JSONReporter()
+        fp = sys.stdout
+    if options.dot:
+        report = reporter.DotReporter(fp)
+    else:
+        report = reporter.JSONReporter(fp)
 
     suite = spec.Suite(testcfg)
     suite.find_tests(testdir, options.tests)

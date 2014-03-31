@@ -1,6 +1,9 @@
 import datetime
+import logging
 import os
 import subprocess
+
+log = logging.getLogger('runner')
 
 
 def find(filenames, basefile):
@@ -21,6 +24,7 @@ class Runner(object):
         # we use shell=True here to mask
         # OSError if #!/bin/interp isn't used
         # in scripts
+        log.debug("call %s" % executable)
         p = subprocess.Popen(executable,
                              shell=True,
                              stdout=subprocess.PIPE,
@@ -36,12 +40,13 @@ class Runner(object):
         """
         result = {
             'test': spec.name,
+            'returncode': 0
         }
 
         if phase == "setup":
-            canidates = find(spec.config.setup, spec.executable)
+            canidates = find(spec.setup, spec.executable)
         elif phase == "teardown":
-            canidates = find(reversed(spec.config.teardown), spec.executable)
+            canidates = find(reversed(spec.teardown), spec.executable)
         else:
             canidates = [spec.executable]
 
@@ -70,9 +75,17 @@ class Runner(object):
             try:
                 self.builder.deploy(spec)
                 result.update(self.run(spec, 'setup'))
-                if result.get('returncode') == 0:
+                if result.get('returncode', None) == 0:
                     result.update(self.run(spec))
+            except subprocess.CalledProcessError, e:
+                result['returncode'] = e.returncode
+                result['output'] = e.output
+                result['test'] = 'bundle.deploy'
+                result['executable'] = e.cmd
+                break
             finally:
                 result.update(self.run(spec, 'teardown'))
                 self.builder.reset()
                 yield result
+                if self.options and self.options.failfast:
+                    break

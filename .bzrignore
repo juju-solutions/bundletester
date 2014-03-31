@@ -7,3 +7,5 @@ coverage.xml
 .venv
 .cover/
 .ropeproject/
+result.json
+trusty/

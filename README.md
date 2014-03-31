@@ -10,6 +10,18 @@ it will attempt to look for a 'tests' directory off the project
 root. Using the rules described below it will find and execute
 each test within that directory and produce a report.
 
+Example Usage
+=============
+
+From within the top level of a bundle 
+
+    bundletester -l DEBUG -o result.json
+
+Using a specific directory of tests
+
+    bundletester -l DEBUG -o result --testdir `pwd`
+
+
 Test Directory
 ==============
 

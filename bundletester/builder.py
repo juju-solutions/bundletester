@@ -25,20 +25,23 @@ class Builder(object):
         self.environment.connect()
 
     def deploy(self, spec):
-        if spec.bundle or not os.path.exists(spec.bundle):
+        if not spec.bundle:
             return
+        if not os.path.exists(spec.bundle):
+            raise OSError("Missing required bundle file: %s" % spec.bundle)
         # TODO: use API here
-        subprocess.check_call(['juju-deployer', '-vW', self.config.bundle])
+        subprocess.check_call(['juju-deployer', '-vWc', spec.bundle])
 
     def destroy(self):
         subprocess.check_call(['juju', 'destroy-environment', self.env_name])
 
     def reset(self):
         if self.environment and self.config.reset:
-            self.environment.reset()
+            self.environment.reset(terminate_machines=True)
 
     def build_virtualenv(self, path):
-        subprocess.check_call(['virtualenv', path])
+        subprocess.check_call(['virtualenv', path],
+                              stdout=open('/dev/null', 'w'))
 
     def add_source(self, source):
         subprocess.check_call(['sudo', 'apt-add-repository', '--yes', source])
