@@ -4,10 +4,8 @@ all: lint test
 
 clean:
 	python setup.py clean
-	rm -rf build/ MANIFEST
+	rm -rf build/ MANIFEST dist/* bundletester.egg-inf .cover
 	find . -name '*.pyc' -delete
-	rm -rf dist/*
-	rm -rf .cover
 
 clean_all: clean
 	rm -rf .venv

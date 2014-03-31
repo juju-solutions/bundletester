@@ -30,10 +30,9 @@ from a charm directory with all the default config.
 Test Directory
 ==============
 
-The driver file, 'tests/tests.yaml' is used to control the 
-overall flow of how tests work. All values in this file and
-indeed the file itself are optional. When not provided defaults
-will be used.
+The driver file, 'tests/tests.yaml' is used (by default) to control the overall
+flow of how tests work. All values in this file and indeed the file itself are
+optional. When not provided defaults will be used.
 
 tests.yaml
 ----------
@@ -51,10 +50,6 @@ A sample `tests.yaml` file::
     packages:
         - amulet
         - python-requests
-    makefile:
-        - lint
-        - test
-        - proof
 
 Explanation of keys:
 
@@ -75,9 +70,6 @@ sources: list of package sources to add automatically
 
 packages: list of packages to install automatically with apt
 
-makefile: If the bundle has a makefile and any of the list of targets are
-present they will be run and their exit codes treated as tests automatically.
-This is useful as Makefiles often automate running lint, proof and unittests.
 
 Found Tests
 -----------
@@ -138,3 +130,10 @@ each test result is a dict with:
 
 `exit` will not be included if result is sucess (0)
 
+
+TODO
+====
+Finish Test, started as TDD and then hulksmashed the end
+Better runtime streaming
+Cleaner reporting
+More visability into process
