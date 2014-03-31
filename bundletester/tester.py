@@ -1,11 +1,30 @@
 import argparse
 import logging
 import os
+import signal
 import subprocess
 import sys
 
 from bundletester import (config, builder, spec,
                           runner, reporter)
+
+
+class timeout:
+    DEFAULT_TIMEOUT = 45 * 60
+
+    def __init__(self, seconds=1, error_message='Timeout'):
+        self.seconds = seconds
+        self.error_message = error_message
+
+    def handle_timeout(self, signum, frame):
+        raise OSError(self.error_message)
+
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
 
 
 def current_environment():
@@ -27,6 +46,7 @@ def configure():
     parser.add_argument('-o', '--output', dest="output")
     parser.add_argument('--dot', action="store_true")
     parser.add_argument('-v', '--verbose', action="store_true")
+    parser.add_argument('--timeout', type=int, default=timeout.DEFAULT_TIMEOUT)
     parser.add_argument('--testdir')
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
@@ -86,8 +106,9 @@ def main():
 
     run = runner.Runner(suite, env, options)
     report.header()
-    for result in run():
-        report.emit(result)
+    with timeout(options.timeout):
+        for result in run():
+            report.emit(result)
     report.summary()
     report.exit()
 
