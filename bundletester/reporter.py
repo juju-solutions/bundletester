@@ -59,7 +59,7 @@ class DotReporter(Reporter):
     def emit(self, msg):
         self.messages.append(msg)
         ec = msg.get('returncode', 0)
-        if self.options.verbose:
+        if self.options and self.options.verbose:
             log.info(msg['test'])
         self.fp.write(self.responses.get(ec, 'F'))
         self.fp.flush()

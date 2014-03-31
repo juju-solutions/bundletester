@@ -17,7 +17,7 @@ def validate():
     subprocess.check_output(['juju', 'version'])
 
 
-def main():
+def configure():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-e', '--environment')
@@ -34,22 +34,25 @@ def main():
     if not options.environment:
         options.environment = current_environment()
     logging.basicConfig(level=options.log_level)
+    return options
 
+
+def find_dir(testdir):
+    if not testdir:
+        if os.path.exists('tests'):
+            testdir = os.path.abspath('tests')
+        elif os.path.basename(os.getcwd()) == 'tests':
+            testdir = os.path.abspath(os.getcwd())
+            if not testdir or not os.path.exists(testdir):
+                raise OSError("Cannot find tests location")
+    return testdir
+
+
+def main():
+    options = configure()
     validate()
 
-    # Hidden from nose
-    def find_test_dir(testdir):
-        if not testdir:
-            if os.path.exists('tests'):
-                testdir = os.path.abspath('tests')
-            elif os.path.basename(os.getcwd()) == 'tests':
-                testdir = os.path.abspath(os.getcwd())
-                if not testdir or not os.path.exists(testdir):
-                    raise OSError("Cannot find tests location")
-        return testdir
-
-    testdir = find_test_dir(options.testdir)
-
+    testdir = find_dir(options.testdir)
     cfg = os.path.join(testdir, 'tests.yaml')
     if not os.path.exists(cfg):
         cfg = None
