@@ -1,0 +1,146 @@
+#!/usr/bin/python3
+
+## This Amulet test deploys memcached.
+
+import amulet
+import telnetlib
+import time
+
+# The number of seconds to wait for the environment to setup.
+seconds = 1200
+
+d = amulet.Deployment()
+# Add the memcached charm to the deployment.
+d.add('memcached')
+# Add the mediawiki charm to the deployment.
+d.add('mediawiki')
+# Create a relation from memcached to mediawiki
+d.relate('memcached:cache', 'mediawiki:cache')
+
+# Create a configuration dictionary for custom memcached values.
+configuration = {'size': 512, 'connection-limit': 128, 'factor': 1.10,
+                 'tcp-port': 11212, 'udp-port': 11213}
+d.configure('memcached', configuration)
+# Expose memcached so it is visible to the tests.
+d.expose('memcached')
+
+try:
+    # Execute the deployer with the current mapping.
+    d.setup(timeout=seconds)
+    # Wait for the relation to finish the translations.
+    d.sentry.wait(seconds)
+except amulet.helpers.TimeoutError:
+    message = 'The environment did not setup in %d seconds.' % seconds
+    # The SKIP status enables skip or fail the test based on configuration.
+    amulet.raise_status(amulet.SKIP, msg=message)
+except:
+    raise
+
+# Get the sentry for memcached.
+memcached_unit = d.sentry.unit['memcached/0']
+
+## Test if the memcached service is running.
+
+# Run the command that checks if the memcached server instance is running.
+command = 'service memcached status'
+# Execute the command on the deployed service.
+output, code = memcached_unit.run(command)
+
+if code != 0:
+    message = 'The ' + command + ' returned %d.' % code
+    print(output)
+    amulet.raise_status(amulet.FAIL, msg=message)
+else:
+    message = 'The memcached service is running.'
+    print(output)
+    print(message)
+
+## Test memcached using telnet commands.
+
+# Get the public address for memcached instance.
+memcached_address = memcached_unit.info['public-address']
+# Get the port for memcached instance.
+memcached_port = configuration['tcp-port'] 
+
+try:
+    # Connect to memcached via telnet.
+    tn = telnetlib.Telnet(memcached_address, memcached_port)
+    date_time = time.strftime("%F %r")
+    # Write the command that gets the current greeting.
+    tn.write(b'get greeting\r\n')
+    # Read the current greeting.
+    response = tn.read_until(b'END', 2)
+    # Create a string with date and time for this test.
+    string = 'memcached test %s' % date_time
+    command = 'set greeting 1 0 %d' % len(string)
+    # Write the command that sets the new greeting.
+    tn.write(command.encode() + b'\r\n')
+    tn.write(string.encode() + b'\r\n')
+    # Read the response
+    response = tn.read_until(b'STORED', 2)
+    # Write the command that gets the greeting.
+    tn.write(b'get greeting\r\n')
+    # Get the new greeting in memcached.
+    response = tn.read_until(b'END', 2)
+    response = response.decode()
+    print('get greeting response:')
+    print(response)
+    # Look for the string in the response.
+    index = response.find(string)
+    if index != -1:
+        print('Found %s in the greeting response.' % string)
+    else:
+        print(response)
+        message = 'Did not find %s in the greeting from memcached.' % string
+        amulet.raise_status(amulet.FAIL, msg=message)
+    tn.write(b'quit\n')
+except Exception as e:
+    message = 'An error occurred communicating with memcached over telnet ' \
+        '{0}:{1} {3}'.format(memcached_address, memcached_port, str(e))
+    amulet.raise_status(amulet.FAIL, msg=message)
+finally:
+    tn.close()
+
+## Test if the memcached service is configured properly.
+
+# Get the contents of the memcached configuration file.
+config_string = memcached_unit.file_contents('/etc/memcached.conf')
+# Parse the configuration file for the values sent in the deployment.
+for line in config_string.splitlines():
+    if line.startswith('-m '):
+        size = line.split()[1]
+    elif line.startswith('-c '):
+        limit = line.split()[1]
+    elif line.startswith('-f '):
+        factor = line.split()[1]
+
+# Check for the configured values.
+if (configuration['size'] != int(size) or
+   configuration['connection-limit'] != int(limit) or
+   configuration['factor'] != float(factor)):
+    message = 'The memcached deployment was not configured correctly, size: ' \
+              '{0} limit: {1} factor: {2}'.format(size, limit, factor)
+    amulet.raise_status(amulet.FAIL, msg=message)
+else:
+    message = 'The memcached deployment was configured correctly.'
+    print(message)
+
+## Test if the relation is complete and data was exchanged properly.
+
+memcached_unit = d.sentry.unit['memcached/0']
+# Get the relation from memcached to mediawiki.
+relation = memcached_unit.relation('cache', 'mediawiki:cache')
+
+# Make sure the relation got the port information set by the configuration.
+if (configuration['tcp-port'] != int(relation['port']) or
+   configuration['udp-port'] != int(relation['udp-port'])):
+    message = 'The memcached relation was not configured correctly, port: ' \
+              '{0} udp-port: {1}'.format(relation['port'], relation['udp-port'])
+    amulet.raise_status(amulet.FAIL, msg=message)
+else:
+    message = 'The memcached relation was configured correctly.'
+    print(message)
+
+# Print a message indicating the charm passed all the tests.
+message = 'The memcached charm passed the deploy tests!'
+print(message)
