@@ -3,6 +3,13 @@ import sys
 
 
 class Reporter(object):
+    responses = {
+        0: 'PASS',
+        -1: 'ERROR',
+        1: 'ERROR',
+        None: 'FAIL'
+    }
+
     def __init__(self, fp=sys.stdout, options=None):
         self.fp = fp
         self.options = options
@@ -20,8 +27,10 @@ class Reporter(object):
             ec = m['returncode']
             ec_ct = by_code.get(ec,  0)
             by_code[ec] = ec_ct + 1
-        self.fp.write("Exit Codes: %s %s Total: %s\n" % (
-            by_code, total_seconds, len(self.messages)))
+        for ec, ct in by_code.items():
+            self.fp.write("%s: %s " % (self.responses.get(ec), ct))
+        self.fp.write("Total: %s (%s sec)\n" % (
+            len(self.messages), total_seconds))
 
     def exit(self):
         for m in self.messages:
@@ -40,7 +49,7 @@ class DotReporter(Reporter):
 
     def emit(self, msg):
         self.messages.append(msg)
-        ec = msg['returncode']
+        ec = msg.get('returncode', 0)
         self.fp.write(self.responses.get(ec, 'F'))
         self.fp.flush()
 

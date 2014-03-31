@@ -12,8 +12,9 @@ def find(filenames, basefile):
 
 
 class Runner(object):
-    def __init__(self, suite, options=None):
+    def __init__(self, suite, builder, options=None):
         self.suite = suite
+        self.builder = builder
         self.options = options
 
     def _run(self, executable):
@@ -63,14 +64,15 @@ class Runner(object):
         return result
 
     def __call__(self):
+        self.builder.bootstrap()
         for spec in self.suite:
             result = {}
             try:
+                self.builder.deploy(spec)
                 result.update(self.run(spec, 'setup'))
                 if result.get('returncode') == 0:
                     result.update(self.run(spec))
-            except Exception, e:
-                print e
             finally:
                 result.update(self.run(spec, 'teardown'))
+                self.builder.reset()
                 yield result

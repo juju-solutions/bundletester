@@ -3,13 +3,8 @@ import os
 from bundletester import config
 
 
-class _O(dict):
-    def __getattr__(self, key):
-        return self[key]
-
-
 def loader(testfile, parent=None):
-    result = _O()
+    result = config.Parser()
     if not os.path.exists(testfile) or \
             not os.access(testfile, os.X_OK | os.R_OK):
         raise OSError('Expected executable test file: %s' % testfile)
@@ -25,18 +20,18 @@ def loader(testfile, parent=None):
     return result
 
 
-class Spec(_O):
+class Spec(config.Parser):
     def __init__(self, testfile, parent):
         data = loader(testfile, parent)
         self.update(data)
 
 
 class Suite(list):
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self, config):
+        self.config = config
 
     def spec(self, testfile):
-        self.append(Spec(testfile, self.parent))
+        self.append(Spec(testfile, self.config))
 
     def find_tests(self, bundledir, filterset=None):
         tests = set(glob.glob(os.path.join(bundledir, 'test*')))
