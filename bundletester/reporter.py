@@ -1,5 +1,8 @@
 import json
+import logging
 import sys
+
+log = logging.getLogger('reporter')
 
 
 class Reporter(object):
@@ -19,6 +22,9 @@ class Reporter(object):
         """Emit a single record to output fp"""
         self.messages.append(msg)
 
+    def header(self):
+        pass
+
     def summary(self):
         total_seconds = 0
         by_code = {}
@@ -28,7 +34,8 @@ class Reporter(object):
             ec_ct = by_code.get(ec,  0)
             by_code[ec] = ec_ct + 1
 
-        self.fp.write('\n')
+        if len(self.messages):
+            self.fp.write('\n')
         for ec, ct in by_code.items():
             self.fp.write("%s: %s " % (self.status_flags.get(ec), ct))
         self.fp.write("Total: %s (%s sec)\n" % (
@@ -52,8 +59,13 @@ class DotReporter(Reporter):
     def emit(self, msg):
         self.messages.append(msg)
         ec = msg.get('returncode', 0)
+        if self.options.verbose:
+            log.info(msg['test'])
         self.fp.write(self.responses.get(ec, 'F'))
         self.fp.flush()
+
+    def header(self):
+        self.fp.write("Running Tests...\n")
 
 
 class JSONReporter(Reporter):

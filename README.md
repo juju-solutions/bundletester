@@ -21,6 +21,11 @@ Using a specific directory of tests
 
     bundletester -l DEBUG -o result --testdir `pwd`
 
+Using the --testdir directive you can also run the tests
+from a charm directory with all the default config.
+
+    bundletester -l DEBUG -o result --testdir charm/tests
+
 
 Test Directory
 ==============

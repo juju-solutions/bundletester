@@ -21,10 +21,12 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-e', '--environment')
+    parser.add_argument('-f', '--failfast', action="store_true")
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
     parser.add_argument('-o', '--output', dest="output")
     parser.add_argument('--dot', action="store_true")
+    parser.add_argument('-v', '--verbose', action="store_true")
     parser.add_argument('--testdir')
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
@@ -68,17 +70,19 @@ def main():
     else:
         fp = sys.stdout
     if options.dot:
-        report = reporter.DotReporter(fp)
+        report = reporter.DotReporter(fp, options)
     else:
-        report = reporter.JSONReporter(fp)
+        report = reporter.JSONReporter(fp, options)
 
     suite = spec.Suite(testcfg)
     suite.find_tests(testdir, options.tests)
     if not len(suite):
+        report.header()
         report.summary()
         report.exit()
 
     run = runner.Runner(suite, env, options)
+    report.header()
     for result in run():
         report.emit(result)
     report.summary()
