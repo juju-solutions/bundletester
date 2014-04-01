@@ -45,11 +45,13 @@ def configure():
     parser.add_argument('-f', '--failfast', action="store_true")
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
-    parser.add_argument('-o', '--output', dest="output")
+    parser.add_argument('-o', '--output', dest="output",
+                        type=argparse.FileType('w'))
     parser.add_argument('--dot', action="store_true")
     parser.add_argument('-v', '--verbose', action="store_true")
     parser.add_argument('--timeout', type=int, default=timeout.DEFAULT_TIMEOUT)
-    parser.add_argument('--testdir')
+    parser.add_argument('--test-pattern', dest="test_pattern", default="test*")
+    parser.add_argument('-t', '--testdir', default='tests')
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
 
@@ -90,17 +92,16 @@ def main():
     env.add_sources(testcfg.sources)
     env.install_packages()
 
-    if isinstance(options.output, str):
-        fp = open(options.output, 'w')
-    else:
-        fp = sys.stdout
+    if not options.output:
+        options.output = sys.stdout
+
     if options.dot:
-        report = reporter.DotReporter(fp, options)
+        report = reporter.DotReporter(options.output, options)
     else:
-        report = reporter.JSONReporter(fp, options)
+        report = reporter.JSONReporter(options.output, options)
 
     suite = spec.Suite(testcfg)
-    suite.find_tests(testdir, options.tests)
+    suite.find_tests(testdir, options.tests, options.test_pattern)
     if not len(suite):
         report.header()
         report.summary()

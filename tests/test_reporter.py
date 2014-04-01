@@ -32,5 +32,6 @@ class TestReporter(unittest.TestCase):
         r.emit(sample2)
         r.summary()
         output = buf.getvalue()
-        self.assertEqual(output, json.dumps([sample1, sample2],
-                                            indent=2) + '\n')
+        self.assertEqual(output,
+                         json.dumps([sample1, sample2],
+                                    indent=2) + '\n')

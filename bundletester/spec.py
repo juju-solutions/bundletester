@@ -42,8 +42,8 @@ class Suite(list):
     def spec(self, testfile):
         self.append(Spec(testfile, self.config))
 
-    def find_tests(self, bundledir, filterset=None):
-        testpat = self.config.get('tests', 'test*')
+    def find_tests(self, bundledir, filterset=None, test_pattern="test*"):
+        testpat = self.config.get('tests', test_pattern)
         tests = set(glob.glob(os.path.join(bundledir, testpat)))
         if filterset:
             filterset = [os.path.join(bundledir, f) for f in filterset]
