@@ -10,6 +10,8 @@ from bundletester import (config, builder, spec,
 
 
 class timeout:
+    # This pattern conflicts with jujuclient which uses
+    # its own handler on sigalrm
     DEFAULT_TIMEOUT = 45 * 60
 
     def __init__(self, seconds=1, error_message='Timeout'):
@@ -106,9 +108,9 @@ def main():
 
     run = runner.Runner(suite, env, options)
     report.header()
-    with timeout(options.timeout):
-        for result in run():
-            report.emit(result)
+    ## Timeout conflicted with handler in jujuclient
+    ## with timeout(options.timeout):
+    [report.emit(result) for result in run()]
     report.summary()
     report.exit()
 

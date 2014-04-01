@@ -43,7 +43,8 @@ class Suite(list):
         self.append(Spec(testfile, self.config))
 
     def find_tests(self, bundledir, filterset=None):
-        tests = set(glob.glob(os.path.join(bundledir, 'test*')))
+        testpat = self.config.get('tests', 'test*')
+        tests = set(glob.glob(os.path.join(bundledir, testpat)))
         if filterset:
             filterset = [os.path.join(bundledir, f) for f in filterset]
             tests = tests.intersection(set(filterset))
