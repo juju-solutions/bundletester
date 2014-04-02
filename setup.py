@@ -2,16 +2,10 @@ from setuptools import setup, find_packages
 import os
 
 
-version_file = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                            'VERSION'))
-with open(version_file) as v:
-    VERSION = v.read().strip()
-
-
 SETUP = {
     'name': "bundletester",
     'packages': find_packages(),
-    'version': VERSION,
+    'version': "0.3.3",
     'author': "Ubuntu Developers",
     'author_email': "ubuntu-devel-discuss@lists.ubuntu.com",
     'url': "https://code.launchpad.net/charm-helpers",

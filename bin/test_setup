@@ -1,6 +1,11 @@
 #!/bin/bash
-virtualenv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
+set -x 
 
+if [ ! -d .venv ]; then
+    virtualenv .venv
+    . .venv/bin/activate
+    pip install --upgrade pip
+    pip install wheel
+    pip install --use-wheel -f deps --no-index -r requirements.txt
+fi
 

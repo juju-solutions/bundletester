@@ -3,11 +3,8 @@ PROJECT=bundlerunner
 all: lint test
 
 clean:
-	python setup.py clean
-	rm -rf build/ MANIFEST dist/* bundletester.egg-inf .cover
+	rm -rf MANIFEST dist/* bundletester.egg-inf .cover
 	find . -name '*.pyc' -delete
-
-clean_all: clean
 	rm -rf .venv
 
 test: .venv
