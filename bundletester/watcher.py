@@ -65,8 +65,9 @@ def main():
     if not options.revisions:
         options.revisions = os.path.join(curdir, 'revisions.json')
 
-    tmpdir = tempfile.mkdtemp()
-    os.chdir(tmpdir)
+    if options.bundle_only is False:
+        tmpdir = tempfile.mkdtemp()
+        os.chdir(tmpdir)
 
     logging.info("Fetching Bundle")
     get_bundle(options.bundle)
