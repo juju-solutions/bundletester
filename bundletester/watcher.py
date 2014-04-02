@@ -51,6 +51,7 @@ def setup_parser():
                         default=logging.INFO)
     parser.add_argument('-n', '--deployment')
     parser.add_argument('-r', '--revisions')
+    parser.add_argument('-b', '--bundle-only', action="store_true", dest="bundle_only")
     parser.add_argument('bundle')
     return parser.parse_args()
 
@@ -72,6 +73,9 @@ def main():
     configs = glob.glob('bundle/*.yaml')
     if not configs:
         raise ValueError("%s missing YAML files" % options.bundle)
+
+    if options.bundle_only:
+        sys.exit(0)
 
     c = ConfigStack(configs)
     if not options.deployment and len(c.keys()) == 1:
