@@ -1,14 +1,16 @@
 BundleTester
 ============
 
-A simple juju-deployer test runner for bundles.
+A juju-deployer based test runner for bundles.
 
-This test runner uses the following pattern. A bundle has a URL.
-The runner can be run directly from within a bundle checkout or
-will pull the branch pointed at by the bundle url. From there
-it will attempt to look for a 'tests' directory off the project 
-root. Using the rules described below it will find and execute
-each test within that directory and produce a report.
+This test runner uses the following pattern. A bundle has a URL. The runner can
+be run directly from within a bundle checkout or will pull the branch pointed
+at by the bundle url. From there it will attempt to look for a 'tests'
+directory off the project root. Using the rules described below it will find
+and execute each test within that directory and produce a report.
+
+This also includes a bundlewatcher script that can be used as a Jenkins
+script trigger.
 
 Example Usage
 =============

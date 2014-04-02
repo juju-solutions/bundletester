@@ -1,0 +1,14 @@
+test-bundle:
+  series: trusty
+  services:
+    nats:
+      charm: cf-nats
+      branch: lp:~cf-charmers/charms/trusty/cf-nats/trunk
+      constraints: arch=amd64
+    dea:
+      charm: cf-dea
+      constraints: arch=amd64
+      branch: lp:~cf-charmers/charms/trusty/cf-dea/trunk
+  relations:
+    - [nats, dea]
+

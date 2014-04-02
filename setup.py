@@ -19,7 +19,8 @@ SETUP = {
     'long_description': open('README.md').read(),
     'entry_points': {
         'console_scripts': [
-            'bundletester = bundletester.tester:main'
+            'bundletester = bundletester.tester:main',
+            'bundlewatcher = bundletester.watcher:main'
         ]
     }
 }
