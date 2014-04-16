@@ -31,6 +31,7 @@ class Runner(object):
                              stderr=subprocess.STDOUT)
         retcode = p.wait()
         output = p.stdout.read()
+        log.debug(output)
         return retcode, output
 
     def run(self, spec, phase=None):
