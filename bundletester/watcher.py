@@ -49,9 +49,10 @@ def setup_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
-    parser.add_argument('-n', '--deployment')
+    parser.add_argument('-d', '--deployment')
     parser.add_argument('-r', '--revisions')
-    parser.add_argument('-b', '--bundle-only', action="store_true", dest="bundle_only")
+    parser.add_argument('-b', '--bundle-only',
+                        action="store_true", dest="bundle_only")
     parser.add_argument('bundle')
     return parser.parse_args()
 
@@ -61,7 +62,6 @@ def main():
     logging.basicConfig(level=options.log_level)
 
     curdir = os.getcwd()
-
     if not options.revisions:
         options.revisions = os.path.join(curdir, 'revisions.json')
 

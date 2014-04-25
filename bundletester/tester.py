@@ -42,6 +42,8 @@ def configure():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-e', '--environment')
+    parser.add_argument('-b', '--bundle', default="bundle.yaml")
+    parser.add_argument('-d', '--deployment')
     parser.add_argument('-f', '--failfast', action="store_true")
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
@@ -102,8 +104,9 @@ def main():
     else:
         report = reporter.JSONReporter(options.output, options)
 
-    suite = spec.Suite(testcfg)
+    suite = spec.Suite(testcfg, options)
     suite.find_tests(testdir, options.tests, options.test_pattern)
+    suite.find_suites()
     run = runner.Runner(suite, build, options)
     report.header()
     ## Timeout conflicted with handler in jujuclient

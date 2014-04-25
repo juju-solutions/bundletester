@@ -3,6 +3,8 @@ import logging
 import os
 import subprocess
 
+from bundletester.spec import Suite
+
 log = logging.getLogger('runner')
 
 
@@ -21,9 +23,6 @@ class Runner(object):
         self.options = options
 
     def _run(self, executable):
-        # we use shell=True here to mask
-        # OSError if #!/bin/interp isn't used
-        # in scripts
         log.debug("call %s" % executable)
         if self.options.dryrun:
             return 0, ""
@@ -72,31 +71,57 @@ class Runner(object):
         result['duration'] = duration.total_seconds()
         return result
 
+    def _handle_result(self, result):
+        stop = False
+        if self.options and self.options.failfast and \
+                result.get('returncode', 1) != 0:
+            log.debug('Failfast from %s' % result['test'])
+            stop = True
+        return result, stop
+
     def __call__(self):
-        self.builder.bootstrap()
-        for spec in self.suite:
-            result = {}
-            try:
-                try:
-                    self.builder.deploy(spec)
-                except subprocess.CalledProcessError, e:
-                    result['test'] = 'bundle.deploy'
-                    break
-                result.update(self.run(spec, 'setup'))
-                if result.get('returncode', None) == 0:
-                    result.update(self.run(spec))
-            except subprocess.CalledProcessError, e:
-                result['returncode'] = e.returncode
-                result['output'] = e.output
-                result['executable'] = e.cmd
-                break
-            finally:
-                td = self.run(spec, 'teardown')
-                if td.get('returncode') != 0:
-                    log.error('Failed to teardown test %s' % spec)
-                self.builder.reset()
+        bootstrapped = False
+        for element in self.suite:
+            if isinstance(element, Suite):
+                for result in self._run_suite(element):
+                    result, stop = self._handle_result(result)
+                    yield result
+                    if stop:
+                        raise StopIteration
+            else:
+                if not bootstrapped:
+                    self.builder.bootstrap()
+                    bootstrapped = True
+                result, stop = self._handle_result(self._run_test(element))
                 yield result
-                if self.options and self.options.failfast and \
-                        result.get('returncode', 1) != 0:
-                    log.debug('Failfast from %s' % result['test'])
-                    break
+                if stop:
+                    raise StopIteration
+
+    def _run_suite(self, suite):
+        for spec in suite:
+            yield self._run_test(spec)
+
+    def _run_test(self, spec):
+        result = {}
+        cwd = os.getcwd()
+        self.builder.deploy(spec)
+        try:
+            basedir = spec.get('dirname')
+            if basedir:
+                result['dirname'] = basedir
+                os.chdir(basedir)
+            result.update(self.run(spec, 'setup'))
+            if result.get('returncode', None) == 0:
+                result.update(self.run(spec))
+        except subprocess.CalledProcessError, e:
+            result['returncode'] = e.returncode
+            result['output'] = e.output
+            result['executable'] = e.cmd
+        finally:
+            os.chdir(cwd)
+            td = self.run(spec, 'teardown')
+            if td.get('returncode') != 0:
+                log.error('Failed to teardown test %s' % spec)
+            self.builder.reset()
+            result['suite'] = spec.get('suite')
+            return result
