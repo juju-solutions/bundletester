@@ -47,6 +47,8 @@ def configure():
                         default=logging.INFO)
     parser.add_argument('-o', '--output', dest="output",
                         type=argparse.FileType('w'))
+    parser.add_argument('-n', '--dry-run', action="store_true",
+                        dest="dryrun")
     parser.add_argument('--dot', action="store_true")
     parser.add_argument('-v', '--verbose', action="store_true")
     parser.add_argument('--timeout', type=int, default=timeout.DEFAULT_TIMEOUT)
@@ -61,7 +63,7 @@ def configure():
     return options
 
 
-def find_dir(testdir):
+def find_testdir(testdir):
     if not testdir:
         if os.path.exists('tests'):
             testdir = os.path.abspath('tests')
@@ -76,21 +78,21 @@ def main():
     options = configure()
     validate()
 
-    testdir = find_dir(options.testdir)
+    testdir = find_testdir(options.testdir)
     cfg = os.path.join(testdir, 'tests.yaml')
     if not os.path.exists(cfg):
         cfg = None
     testcfg = config.Parser(cfg)
-    env = builder.Builder(testcfg, options.environment)
+    build = builder.Builder(testcfg, options)
 
     if testcfg.virtualenv:
         vpath = os.path.join(testdir, '.venv')
-        env.build_virtualenv(vpath)
+        build.build_virtualenv(vpath)
         apath = os.path.join(vpath, 'bin/activate_this.py')
         execfile(apath, dict(__file__=apath))
 
-    env.add_sources(testcfg.sources)
-    env.install_packages()
+    build.add_sources(testcfg.sources)
+    build.install_packages()
 
     if not options.output:
         options.output = sys.stdout
@@ -102,16 +104,12 @@ def main():
 
     suite = spec.Suite(testcfg)
     suite.find_tests(testdir, options.tests, options.test_pattern)
-    if not len(suite):
-        report.header()
-        report.summary()
-        report.exit()
-
-    run = runner.Runner(suite, env, options)
+    run = runner.Runner(suite, build, options)
     report.header()
     ## Timeout conflicted with handler in jujuclient
     ## with timeout(options.timeout):
-    [report.emit(result) for result in run()]
+    if len(suite):
+        [report.emit(result) for result in run()]
     report.summary()
     report.exit()
 

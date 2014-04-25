@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 from deployer.env.go import GoEnvironment
@@ -6,15 +7,22 @@ from deployer.env.go import GoEnvironment
 class Builder(object):
     """Build out the system-level environment needed to run tests"""
 
-    def __init__(self, config, environment_name=None):
+    def __init__(self, config, options):
         self.config = config
-        self.env_name = environment_name
+        self.options = options
         self.environment = None
-        if self.env_name:
-            self.environment = GoEnvironment(self.env_name)
+        self.env_name = None
+        if options:
+            self.env_name = options.environment
+            if self.env_name:
+                self.environment = GoEnvironment(self.env_name)
 
     def bootstrap(self):
         if not self.environment:
+            return
+
+        logging.debug("Bootstrap environment: %s" % self.env_name)
+        if self.options.dryrun:
             return
         if self.config.bootstrap:
             ec = subprocess.call(['juju', 'status'],
@@ -29,7 +37,8 @@ class Builder(object):
             return
         if not os.path.exists(spec.bundle):
             raise OSError("Missing required bundle file: %s" % spec.bundle)
-        # TODO: use API here
+        if self.options.dryrun:
+            return
         subprocess.check_call(['juju-deployer', '-vWc', spec.bundle])
 
     def destroy(self):

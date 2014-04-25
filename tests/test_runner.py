@@ -16,17 +16,26 @@ def locate(name):
     return os.path.join(TEST_FILES, name)
 
 
+class O(object):
+    pass
+
+
 class TestRunner(unittest.TestCase):
 
     def test_run_suite(self):
         logging.basicConfig(level=logging.CRITICAL)
         parser = config.Parser()
         parser.bootstrap = False
-        env = builder.Builder(parser)
+        options = O()
+        options.dryrun = True
+        options.environment = 'local'
+        options.failfast = True
+
+        env = builder.Builder(parser, options)
         suite = spec.Suite(config=parser)
         suite.spec(locate('test02'))
         self.assertEqual(suite[0].name, 'test02')
-        run = runner.Runner(suite, env)
+        run = runner.Runner(suite, env, options)
         results = list(run())
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['returncode'], 0)

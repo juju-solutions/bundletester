@@ -25,13 +25,16 @@ class Runner(object):
         # OSError if #!/bin/interp isn't used
         # in scripts
         log.debug("call %s" % executable)
+        if self.options.dryrun:
+            return 0, ""
+
         p = subprocess.Popen(executable,
-                             shell=True,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
         retcode = p.wait()
         output = p.stdout.read()
-        log.debug(output)
+        log.debug("OUTPUT\n%s" % output)
+        log.debug("Exit Code: %s" % retcode)
         return retcode, output
 
     def run(self, spec, phase=None):
@@ -74,19 +77,26 @@ class Runner(object):
         for spec in self.suite:
             result = {}
             try:
-                self.builder.deploy(spec)
+                try:
+                    self.builder.deploy(spec)
+                except subprocess.CalledProcessError, e:
+                    result['test'] = 'bundle.deploy'
+                    break
                 result.update(self.run(spec, 'setup'))
                 if result.get('returncode', None) == 0:
                     result.update(self.run(spec))
             except subprocess.CalledProcessError, e:
                 result['returncode'] = e.returncode
                 result['output'] = e.output
-                result['test'] = 'bundle.deploy'
                 result['executable'] = e.cmd
                 break
             finally:
-                result.update(self.run(spec, 'teardown'))
+                td = self.run(spec, 'teardown')
+                if td.get('returncode') != 0:
+                    log.error('Failed to teardown test %s' % spec)
                 self.builder.reset()
                 yield result
-                if self.options and self.options.failfast:
+                if self.options and self.options.failfast and \
+                        result.get('returncode', 1) != 0:
+                    log.debug('Failfast from %s' % result['test'])
                     break

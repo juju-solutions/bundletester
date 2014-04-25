@@ -36,6 +36,15 @@ class Reporter(object):
 
         if len(self.messages):
             self.fp.write('\n')
+        if len(by_code.keys()) > 1 or 0 not in by_code:
+            for m in self.messages:
+                if m['returncode'] == 0:
+                    continue
+                self.fp.write('-' * 78 + '\n')
+                self.fp.write("%s\n" % (m['test']))
+                self.fp.write("[%-30s exited %s]\n" % (
+                    m['exit'], m['returncode']))
+                self.fp.write("%s\n" % m['output'])
         for ec, ct in by_code.items():
             self.fp.write("%s: %s " % (self.status_flags.get(ec), ct))
         self.fp.write("Total: %s (%s sec)\n" % (

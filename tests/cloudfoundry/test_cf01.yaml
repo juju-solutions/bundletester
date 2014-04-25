@@ -1,1 +1,3 @@
 bundle: cloudfoundry.yaml
+bootstrap: false
+reset: false
