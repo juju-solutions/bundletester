@@ -89,7 +89,7 @@ class Runner(object):
                     if stop:
                         raise StopIteration
             else:
-                if not bootstrapped:
+                if not bootstrapped and element.bundle:
                     self.builder.bootstrap()
                     bootstrapped = True
                 result, stop = self._handle_result(self._run_test(element))
@@ -104,7 +104,8 @@ class Runner(object):
     def _run_test(self, spec):
         result = {}
         cwd = os.getcwd()
-        self.builder.deploy(spec)
+        if spec.bundle:
+            self.builder.deploy(spec)
         try:
             basedir = spec.get('dirname')
             if basedir:

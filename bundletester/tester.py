@@ -42,7 +42,7 @@ def configure():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-e', '--environment')
-    parser.add_argument('-b', '--bundle', default="bundle.yaml")
+    parser.add_argument('-b', '--bundle')
     parser.add_argument('-d', '--deployment')
     parser.add_argument('-f', '--failfast', action="store_true")
     parser.add_argument('-l', '--log-level', dest="log_level",

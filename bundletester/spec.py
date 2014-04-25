@@ -92,7 +92,7 @@ class Suite(list):
         if not bundle:
             return
         if not os.path.exists(bundle):
-            raise OSError("Missing required bundle file: %s" % spec.bundle)
+            raise OSError("Missing required bundle file: %s" % bundle)
         c = ConfigStack([bundle])
         if not self.options.deployment and len(c.keys()) == 1:
             self.options.deployment = c.keys()[0]
