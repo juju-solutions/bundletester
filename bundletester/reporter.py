@@ -1,6 +1,8 @@
 import json
 import logging
 import sys
+from collections import defaultdict
+from itertools import repeat
 
 from blessings import Terminal
 
@@ -12,19 +14,25 @@ class _O(dict):
         return self[k]
 
 
+def constants(value):
+    return repeat(value).next
+
+
 class Reporter(object):
-    status_flags = {
+    status_flags = defaultdict(constants("FAIL"), {
         0: 'PASS',
-        -1: 'ERROR',
         1: 'ERROR',
-        None: 'FAIL'
-    }
+    })
 
     def __init__(self, fp=sys.stdout, options=None):
         self.fp = fp
         self.options = options
         self.messages = []
         self.term = Terminal()
+        self.suite = None
+
+    def set_suite(self, suite):
+        self.suite = suite
 
     def emit(self, msg):
         """Emit a single record to output fp"""
@@ -54,7 +62,9 @@ class Reporter(object):
                     continue
                 self.fp.write('-' * 78 + '\n')
                 if m.get('suite'):
-                    self.write('{t.bold}{t.red}{m.suite}{t.normal}::', m=m)
+                    status = self.status_flags[m['returncode']]
+                    self.write('{t.bold}{t.red}{}{m.suite}{t.normal}::',
+                               status, m=m)
                 self.write("{t.bold}{t.red}{m.test}{t.normal}\n", m=m)
                 self.write("[{t.cyan}{m.exit:<30}{t.normal} exited"
                            " {t.red}{m.returncode}{t.normal}]\n", m=m)
@@ -65,10 +75,20 @@ class Reporter(object):
         if len(self.messages):
             self.write('\n')
         self.report_errors(by_code)
+
         for ec, ct in by_code.items():
-            self.write("{}: {} ", self.status_flags.get(ec), ct)
-        self.write("Total: {} ({} sec)\n",
-                   len(self.messages), total_seconds)
+            status = self.status_flags[ec]
+            self.write("{t.bold}{}{t.normal}: {t.cyan}{}{t.normal} ",
+                       status, ct)
+        ct = len(self.messages)
+        if self.suite:
+            ct = len(self.suite)
+            skipped = len(self.suite) - len(self.messages)
+            if skipped != 0:
+                self.write('SKIP:{t.cyan}{}{t.normal} ', skipped)
+
+        self.write("Total: {t.cyan}{}{t.normal} ({t.cyan}{}{t.normal} sec)\n",
+                   ct, total_seconds)
 
     def exit(self):
         for m in self.messages:
@@ -78,23 +98,56 @@ class Reporter(object):
 
 
 class DotReporter(Reporter):
-    responses = {
+    responses = defaultdict(constants('F'), {
         0: '.',
-        -1: 'E',
         1: 'E',
-        None: 'F'
-    }
+    })
 
     def emit(self, msg):
         super(DotReporter, self).emit(msg)
+        msg = _O(msg)
         ec = msg.get('returncode', 0)
         if self.options and self.options.verbose:
-            log.info(msg['test'])
-        self.write(self.responses.get(ec, 'F'))
+            self.write("{m.test:<40} ", m=msg)
+        self.write(self.responses[ec])
+        if self.options and self.options.verbose:
+            self.write('\n')
         self.fp.flush()
 
     def header(self):
         self.write("Running Tests...\n")
+
+
+class SpecReporter(Reporter):
+
+    def __init__(self, fp=sys.stdout, options=None):
+        super(SpecReporter, self).__init__(fp, options)
+        self.level = 0
+        self.width = 74
+        self.current_suite = None
+
+    def emit(self, message):
+        super(SpecReporter, self).emit(message)
+        message = _O(message)
+        suite = message.get('suite')
+        if suite != self.current_suite:
+            if self.current_suite is not None:
+                self.level -= 1
+            if suite:
+                self.write("{t.bold}{}{t.normal}\n", suite)
+                self.level += 1
+            self.current_suite = suite
+
+        width = self.width - (4 * self.level)
+        color = "green" if message.returncode == 0 else "red"
+        fmt = "{:<%s} {t.%s}{}{t.normal}\n" % (width, color)
+        self.write(fmt, message.test,
+                   self.status_flags[message.returncode])
+
+    def write(self, message, *args, **kwargs):
+        if self.level:
+            message = "    " * self.level + message
+        super(SpecReporter, self).write(message, *args, **kwargs)
 
 
 class JSONReporter(Reporter):
@@ -102,3 +155,11 @@ class JSONReporter(Reporter):
         json.dump(self.messages, self.fp, indent=2)
         self.write('\n')
         self.fp.flush()
+
+FACTORY = {'json': JSONReporter,
+           'dot': DotReporter,
+           'spec': SpecReporter}
+
+
+def get_reporter(name, fp, options):
+    return FACTORY[name](fp, options)

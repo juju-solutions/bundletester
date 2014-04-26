@@ -42,6 +42,15 @@ class Suite(list):
         self.config = config
         self.options = options
 
+    def __len__(self):
+        l = 0
+        for s in self:
+            if isinstance(s, Suite):
+                l += len(s)
+            else:
+                l += 1
+        return l
+
     def spec(self, testfile, dirname=None, suite=None):
         self.append(Spec(testfile, self.config,
                          dirname=dirname,

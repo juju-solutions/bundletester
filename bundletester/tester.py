@@ -51,7 +51,8 @@ def configure():
                         type=argparse.FileType('w'))
     parser.add_argument('-n', '--dry-run', action="store_true",
                         dest="dryrun")
-    parser.add_argument('--dot', action="store_true")
+    parser.add_argument('-r', '--reporter', default="json",
+                        choices=reporter.FACTORY.keys())
     parser.add_argument('-v', '--verbose', action="store_true")
     parser.add_argument('--timeout', type=int, default=timeout.DEFAULT_TIMEOUT)
     parser.add_argument('--test-pattern', dest="test_pattern", default="test*")
@@ -99,14 +100,11 @@ def main():
     if not options.output:
         options.output = sys.stdout
 
-    if options.dot:
-        report = reporter.DotReporter(options.output, options)
-    else:
-        report = reporter.JSONReporter(options.output, options)
-
+    report = reporter.get_reporter(options.reporter, options.output, options)
     suite = spec.Suite(testcfg, options)
     suite.find_tests(testdir, options.tests, options.test_pattern)
     suite.find_suites()
+    report.set_suite(suite)
     run = runner.Runner(suite, build, options)
     report.header()
     ## Timeout conflicted with handler in jujuclient
