@@ -6,14 +6,15 @@ clean:
 	rm -rf MANIFEST dist/* bundletester.egg-inf .cover
 	find . -name '*.pyc' -delete
 	rm -rf .venv
+	rm -rf .cover
 
 test: .venv
 	@echo Starting tests...
-	@./bin/nosetests --nologcapture
+	@./bin/nosetests 
 
 coverage: .venv
 	@echo Starting tests...
-	@./bin/nosetests --nologcapture --with-coverage
+	@./bin/nosetests --with-coverage
 	@xdg-open .cover/index.html
 
 

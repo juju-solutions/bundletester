@@ -80,7 +80,8 @@ When tests.yaml's test pattern is executed it will yield test that should be run
 of these test files can optional have a control file of the same name but with a `.yaml`
 extension. If present this file has a similar layout to tests.yaml. 
 
-A sample `01-test.yaml` file:
+A sample `01-test.yaml` file::
+
     bundle: bundle.yaml
     setup: script
     teardown: script
@@ -100,7 +101,7 @@ Setup/Teardown
 --------------
 
 If these scripts fail with a non-zero exit code the test will be recorded as a failure with
-that exit code. 
+that exit code.
 
 Test Execution
 --------------
@@ -122,10 +123,11 @@ contain at minimum the following structure (additional keys are possible)
 
     [{test result}, ...]
 
-each test result is a dict with:
+each test result is a dict with at least:
 
     {'test': test file, result: exit_code, 
       'exit': 'script name which returned exit code',
+      'returncode': exitcode of process, 
       'starttime': GMT,
       'endtime': GMT,
       'duration': timedelta in seconds}
@@ -135,7 +137,5 @@ each test result is a dict with:
 
 TODO
 ====
-Finish Test, started as TDD and then hulksmashed the end
-Better runtime streaming
-Cleaner reporting
-More visability into process
+- Finish Tests, started as TDD and then hulk-smashed the end
+- Better runtime streaming

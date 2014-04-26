@@ -123,6 +123,10 @@ class Runner(object):
             td = self.run(spec, 'teardown')
             if td.get('returncode') != 0:
                 log.error('Failed to teardown test %s' % spec)
+                # Only in the event of td failure do we update result
+                # otherwise a successful teardown could overwrite
+                # the failure code of a main phase test
+                result.update(td)
             self.builder.reset()
             result['suite'] = spec.get('suite')
             return result
