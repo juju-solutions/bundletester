@@ -8,11 +8,10 @@ from bundletester import reporter
 
 class TestReporter(unittest.TestCase):
     def make_sample(self, exit=0, output=""):
-        return {'returncode': 0,
+        return {'returncode': exit,
                 'end': '2014-03-31T07:06:43.191730',
                 'start': '2014-03-31T07:06:43.189408',
                 'test': 'test02',
-                'result': exit,
                 'duration': 0.002322,
                 'output': output}
 
@@ -32,6 +31,6 @@ class TestReporter(unittest.TestCase):
         r.emit(sample2)
         r.summary()
         output = buf.getvalue()
-        self.assertEqual(output,
-                         json.dumps([sample1, sample2],
-                                    indent=2) + '\n')
+        result = json.loads(output)
+        self.assertEqual(result[0]['returncode'], 0)
+        self.assertEqual(result[1]['returncode'], 1)

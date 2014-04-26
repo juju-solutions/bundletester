@@ -32,7 +32,7 @@ class TestRunner(unittest.TestCase):
         options.failfast = True
 
         env = builder.Builder(parser, options)
-        suite = spec.Suite(config=parser)
+        suite = spec.Suite(config=parser, options=options)
         suite.spec(locate('test02'))
         self.assertEqual(suite[0].name, 'test02')
         run = runner.Runner(suite, env, options)
