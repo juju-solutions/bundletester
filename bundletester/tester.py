@@ -51,7 +51,7 @@ def configure():
                         type=argparse.FileType('w'))
     parser.add_argument('-n', '--dry-run', action="store_true",
                         dest="dryrun")
-    parser.add_argument('-r', '--reporter', default="json",
+    parser.add_argument('-r', '--reporter', default="spec",
                         choices=reporter.FACTORY.keys())
     parser.add_argument('-v', '--verbose', action="store_true")
     parser.add_argument('--timeout', type=int, default=timeout.DEFAULT_TIMEOUT)

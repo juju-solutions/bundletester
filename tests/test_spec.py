@@ -53,3 +53,8 @@ class TestSpec(unittest.TestCase):
         suite = spec.Suite(parent, None)
         suite.spec(locate('test02'))
         self.assertEqual(suite[0].name, 'test02')
+
+    def test_spec_arguments(self):
+        test = spec.Spec(['ls', '-al'])
+        self.assertEqual(test.executable,
+                         ['/bin/ls', '-al'])

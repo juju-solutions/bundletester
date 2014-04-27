@@ -61,12 +61,13 @@ class Reporter(object):
                 if m['returncode'] == 0:
                     continue
                 self.fp.write('-' * 78 + '\n')
+                status = self.status_flags[m['returncode']]
+                self.write('{t.bold}{t.red}{}: ', status)
                 if m.get('suite'):
-                    status = self.status_flags[m['returncode']]
-                    self.write('{t.bold}{t.red}{}{m.suite}{t.normal}::',
-                               status, m=m)
-                self.write("{t.bold}{t.red}{m.test}{t.normal}\n", m=m)
-                self.write("[{t.cyan}{m.exit:<30}{t.normal} exited"
+                    self.write('{m.suite}{t.normal}::', m=m)
+                self.write("{t.bold}{t.red}{m.test}{t.normal}\n",
+                           m=m)
+                self.write("[{t.cyan}{m.exit:<30}{t.normal} exit"
                            " {t.red}{m.returncode}{t.normal}]\n", m=m)
                 self.write("{t.yellow}{m.output}{t.normal}\n", m=m)
 
@@ -141,13 +142,17 @@ class SpecReporter(Reporter):
         width = self.width - (4 * self.level)
         color = "green" if message.returncode == 0 else "red"
         fmt = "{:<%s} {t.%s}{}{t.normal}\n" % (width, color)
-        self.write(fmt, message.test,
-                   self.status_flags[message.returncode])
+        cmd = message.test
+        self.write(fmt, cmd, self.status_flags[message.returncode])
 
     def write(self, message, *args, **kwargs):
         if self.level:
             message = "    " * self.level + message
         super(SpecReporter, self).write(message, *args, **kwargs)
+
+    def summary(self):
+        self.level = 0
+        super(SpecReporter, self).summary()
 
 
 class JSONReporter(Reporter):

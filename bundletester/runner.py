@@ -12,8 +12,13 @@ def find(filenames, basefile):
     """Normalize files relative to basefile turning
     partial names into files in the same dir as basefile
     """
+    if isinstance(basefile, list):
+        basefile = basefile[0]
     dirname = os.path.dirname(basefile)
-    return [os.path.abspath(os.path.join(dirname, f)) for f in filenames]
+    for f in filenames:
+        if isinstance(f, list):
+            f = f[0]
+            yield os.path.abspath(os.path.join(dirname, f))
 
 
 class Runner(object):
@@ -58,14 +63,17 @@ class Runner(object):
         start = datetime.datetime.utcnow()
         for canidate in canidates:
             ec, output = self._run(canidate)
+            result['returncode'] = ec
+            result['output'] = output
+            result['executable'] = spec.executable
             if ec != 0:
+                if isinstance(canidate, list):
+                    canidate = " ".join(canidate)
                 result['exit'] = canidate
                 break
 
         end = datetime.datetime.utcnow()
         duration = end - start
-        result['returncode'] = ec
-        result['output'] = output
         result['start'] = start.isoformat()
         result['end'] = end.isoformat()
         result['duration'] = duration.total_seconds()
@@ -104,16 +112,24 @@ class Runner(object):
     def _run_test(self, spec):
         result = {}
         cwd = os.getcwd()
-        if spec.bundle:
-            self.builder.deploy(spec)
         try:
-            basedir = spec.get('dirname')
-            if basedir:
-                result['dirname'] = basedir
-                os.chdir(basedir)
-            result.update(self.run(spec, 'setup'))
-            if result.get('returncode', None) == 0:
-                result.update(self.run(spec))
+            if spec.bundle:
+                deployed = self.builder.deploy(spec)
+                if deployed is not True:
+                    result.update(deployed)
+                    result['returncode'] = 2
+                    result['test'] = 'juju-deployer'
+                    result['suite'] = 'bundletester'
+                    result['exit'] = result['executable']
+
+            if result.get('returncode') is None:
+                basedir = spec.get('dirname')
+                if basedir:
+                    result['dirname'] = basedir
+                    os.chdir(basedir)
+                result.update(self.run(spec, 'setup'))
+                if result.get('returncode', None) == 0:
+                    result.update(self.run(spec))
         except subprocess.CalledProcessError, e:
             result['returncode'] = e.returncode
             result['output'] = e.output

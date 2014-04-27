@@ -21,26 +21,40 @@ class Builder(object):
     def bootstrap(self):
         if not self.environment:
             return
-
         logging.debug("Bootstrap environment: %s" % self.env_name)
         if self.options.dryrun:
             return
-        if self.config.bootstrap:
-            ec = subprocess.call(['juju', 'status'],
-                                 stdout=open('/dev/null', 'w'),
-                                 stderr=subprocess.STDOUT)
-            if ec != 0:
+        ec = subprocess.call(['juju', 'status', '-e', self.env_name],
+                             stdout=open('/dev/null', 'w'),
+                             stderr=subprocess.STDOUT)
+        if ec != 0:
+            if self.config.boostrap:
                 self.environment.bootstrap()
-        self.environment.connect()
+        else:
+            self.environment.connect()
 
     def deploy(self, spec):
         if not spec.bundle:
-            return
+            return True
         if not os.path.exists(spec.bundle):
             raise OSError("Missing required bundle file: %s" % spec.bundle)
         if self.options.dryrun:
-            return
-        subprocess.check_call(['juju-deployer', '-vWc', spec.bundle])
+            return True
+        cmd = ['juju-deployer']
+        if self.options.verbose:
+            cmd.append('-Wvd')
+        cmd += ['-c', spec.bundle]
+        if self.options.deployment:
+            cmd.append(self.options.deployment)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+        ec = p.wait()
+        output = p.stdout.read()
+        return {
+            'returncode': ec,
+            'output': output,
+            'executable': cmd
+        }
 
     def destroy(self):
         subprocess.check_call(['juju', 'destroy-environment', self.env_name])
