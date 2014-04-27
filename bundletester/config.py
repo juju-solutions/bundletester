@@ -8,9 +8,10 @@ class Parser(dict):
             'reset': False,
             'bundle': None,
             'virtualenv': True,
+            'tests': "[0-9]*",
             'sources': [],
             'packages': [],
-            'makefile': ['proof', 'lint', 'test'],
+            'makefile': ['lint', 'test'],
             'setup': [],
             'teardown': []
         }

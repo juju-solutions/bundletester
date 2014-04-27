@@ -60,11 +60,14 @@ class Suite(list):
     def spec(self, testfile, **kwargs):
         self.append(Spec(testfile, self.config, **kwargs))
 
-    def find_tests(self, bundledir, filterset=None, test_pattern="test*",
+    def find_tests(self, bundledir, filterset=None,
+                   test_pattern=None,
                    dirname=None, suite=None):
         if dirname is None:
             dirname = os.getcwd()
-        testpat = self.config.get('tests', test_pattern)
+        testpat = test_pattern or \
+            self.options.test_pattern or \
+            self.config.get('tests', 'test*')
         tests = set(glob.glob(os.path.join(bundledir, testpat)))
         if filterset:
             filterset = [os.path.join(bundledir, f) for f in filterset]
@@ -88,9 +91,10 @@ class Suite(list):
                 charm_suite = Suite(self.config, self.options)
                 charm_test_dir = os.path.join(charm.path, 'tests')
                 if os.path.exists(charm_test_dir):
-                    charm_suite.find_implicit_tests(charm.path,
-                                                    dirname=charm.path,
-                                                    suite=charm.name)
+                    if not self.options.skip_implicit:
+                        charm_suite.find_implicit_tests(charm.path,
+                                                        dirname=charm.path,
+                                                        suite=charm.name)
                     charm_suite.find_tests(charm_test_dir,
                                            test_pattern="[0-9]*",
                                            dirname=charm.path,

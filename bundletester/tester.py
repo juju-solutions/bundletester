@@ -1,32 +1,11 @@
 import argparse
 import logging
 import os
-import signal
 import subprocess
 import sys
 
 from bundletester import (config, builder, spec,
                           runner, reporter)
-
-
-class timeout:
-    # This pattern conflicts with jujuclient which uses
-    # its own handler on sigalrm
-    DEFAULT_TIMEOUT = 45 * 60
-
-    def __init__(self, seconds=1, error_message='Timeout'):
-        self.seconds = seconds
-        self.error_message = error_message
-
-    def handle_timeout(self, signum, frame):
-        raise OSError(self.error_message)
-
-    def __enter__(self):
-        signal.signal(signal.SIGALRM, self.handle_timeout)
-        signal.alarm(self.seconds)
-
-    def __exit__(self, type, value, traceback):
-        signal.alarm(0)
 
 
 def current_environment():
@@ -44,7 +23,7 @@ def configure():
     parser.add_argument('-e', '--environment')
     parser.add_argument('-b', '--bundle')
     parser.add_argument('-d', '--deployment')
-    parser.add_argument('-f', '--failfast', action="store_true")
+
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
     parser.add_argument('-o', '--output', dest="output",
@@ -54,8 +33,11 @@ def configure():
     parser.add_argument('-r', '--reporter', default="spec",
                         choices=reporter.FACTORY.keys())
     parser.add_argument('-v', '--verbose', action="store_true")
-    parser.add_argument('--timeout', type=int, default=timeout.DEFAULT_TIMEOUT)
-    parser.add_argument('--test-pattern', dest="test_pattern", default="test*")
+
+    parser.add_argument('-f', '--failfast', action="store_true")
+    parser.add_argument('-s', '--skip-implicit', action="store_true",
+                        help="Don't include automatically generated tests")
+    parser.add_argument('--test-pattern', dest="test_pattern")
     parser.add_argument('-t', '--testdir', default='tests')
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
@@ -88,7 +70,9 @@ def main():
     testcfg = config.Parser(cfg)
     build = builder.Builder(testcfg, options)
 
-    if testcfg.virtualenv:
+    # if we are already in a venv we will assume we
+    # can use that
+    if testcfg.virtualenv and not os.environ.get("VIRTUAL_ENV"):
         vpath = os.path.join(testdir, '.venv')
         build.build_virtualenv(vpath)
         apath = os.path.join(vpath, 'bin/activate_this.py')
@@ -102,13 +86,11 @@ def main():
 
     report = reporter.get_reporter(options.reporter, options.output, options)
     suite = spec.Suite(testcfg, options)
-    suite.find_tests(testdir, options.tests, options.test_pattern)
+    suite.find_tests(testdir, options.tests)
     suite.find_suites()
     report.set_suite(suite)
     run = runner.Runner(suite, build, options)
     report.header()
-    ## Timeout conflicted with handler in jujuclient
-    ## with timeout(options.timeout):
     if len(suite):
         [report.emit(result) for result in run()]
     report.summary()
