@@ -56,5 +56,6 @@ class TestSpec(unittest.TestCase):
 
     def test_spec_arguments(self):
         test = spec.Spec(['ls', '-al'])
+        # still found the executable
         self.assertEqual(test.executable,
                          ['/bin/ls', '-al'])

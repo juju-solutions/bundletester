@@ -1,5 +1,6 @@
 import argparse
 import logging
+import glob
 import os
 import subprocess
 import sys
@@ -59,6 +60,15 @@ def find_testdir(testdir):
     return testdir
 
 
+def find_bundle():
+    yamls = glob.glob("*.yaml")
+    if not yamls:
+        return
+    if len(yamls) > 1:
+        raise OSError("Ambigious bundle options: %s" % yamls)
+    return yamls[0]
+
+
 def main():
     options = configure()
     validate()
@@ -68,6 +78,10 @@ def main():
     if not os.path.exists(cfg):
         cfg = None
     testcfg = config.Parser(cfg)
+
+    if not options.bundle:
+        options.bundle = find_bundle()
+
     build = builder.Builder(testcfg, options)
 
     # if we are already in a venv we will assume we

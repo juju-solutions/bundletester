@@ -20,7 +20,7 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(parser.virtualenv)
         self.assertEqual(parser.sources, [])
         self.assertEqual(parser.packages, [])
-        self.assertEqual(parser.makefile, ['proof', 'lint', 'test'])
+        self.assertEqual(parser.makefile, ['lint', 'test'])
         self.assertEqual(parser.setup, [])
 
     def test_config_parse(self):
