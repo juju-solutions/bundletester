@@ -5,6 +5,8 @@ import os
 import subprocess
 import sys
 
+import yaml
+
 from bundletester import (config, builder, spec,
                           runner, reporter)
 
@@ -60,8 +62,28 @@ def find_testdir(testdir):
     return testdir
 
 
-def find_bundle():
-    yamls = glob.glob("*.yaml")
+def filter_yamls(yamls):
+    """Look at a series of *.yaml files to see if they
+    might be deployer files. Return the filtered list.
+    """
+    if not yamls:
+        return
+
+    result = []
+    for yamlfn in yamls:
+        data = yaml.safe_load(open(yamlfn))
+        if not isinstance(data, dict):
+            continue
+        for possible in data.values():
+            if isinstance(possible, dict) and 'services' in possible:
+                result.append(yamlfn)
+    return result
+
+
+def find_bundle(testdir=None):
+    pat = os.path.join(testdir or os.getcwd(), "*.yaml")
+    yamls = glob.glob(pat)
+    yamls = filter_yamls(yamls)
     if not yamls:
         return
     if len(yamls) > 1:
@@ -80,7 +102,12 @@ def main():
     testcfg = config.Parser(cfg)
 
     if not options.bundle:
-        options.bundle = find_bundle()
+        options.bundle = find_bundle(testdir)
+
+    deployment_name = None
+    if options.bundle:
+        deployment_name = os.path.splitext(
+            os.path.basename(options.bundle))[0]
 
     build = builder.Builder(testcfg, options)
 
@@ -100,7 +127,7 @@ def main():
 
     report = reporter.get_reporter(options.reporter, options.output, options)
     suite = spec.Suite(testcfg, options)
-    suite.find_tests(testdir, options.tests)
+    suite.find_tests(testdir, options.tests, suite=deployment_name)
     suite.find_suites()
     report.set_suite(suite)
     run = runner.Runner(suite, build, options)
