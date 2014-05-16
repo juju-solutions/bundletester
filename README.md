@@ -139,8 +139,6 @@ each test result is a dict with at least:
     {'test': test file, result: exit_code, 
       'exit': 'script name which returned exit code',
       'returncode': exitcode of process, 
-      'starttime': GMT,
-      'endtime': GMT,
       'duration': timedelta in seconds}
 
 `exit` will not be included if result is sucess (0)

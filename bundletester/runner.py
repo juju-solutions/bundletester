@@ -74,9 +74,9 @@ class Runner(object):
 
         end = datetime.datetime.utcnow()
         duration = end - start
-        result['start'] = start.isoformat()
-        result['end'] = end.isoformat()
         result['duration'] = duration.total_seconds()
+        if result['duration'] < 0.1:
+            result['duration'] = 0.0
         return result
 
     def _handle_result(self, result):

@@ -24,7 +24,7 @@ def configure():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-e', '--environment')
-    parser.add_argument('-b', '--bundle')
+    parser.add_argument('-b', '-c', '--bundle')
     parser.add_argument('-d', '--deployment')
 
     parser.add_argument('-l', '--log-level', dest="log_level",
@@ -41,7 +41,7 @@ def configure():
     parser.add_argument('-s', '--skip-implicit', action="store_true",
                         help="Don't include automatically generated tests")
     parser.add_argument('--test-pattern', dest="test_pattern")
-    parser.add_argument('-t', '--testdir', default='tests')
+    parser.add_argument('-t', '--testdir', default='.')
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
 
