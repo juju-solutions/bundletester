@@ -65,7 +65,10 @@ class Runner(object):
             ec, output = self._run(canidate)
             result['returncode'] = ec
             result['output'] = output
-            result['executable'] = spec.executable
+            executable = spec.executable
+            if not isinstance(executable, list):
+                executable = [executable]
+            result['executable'] = executable
             if ec != 0:
                 if isinstance(canidate, list):
                     canidate = " ".join(canidate)
