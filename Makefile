@@ -1,4 +1,4 @@
-PROJECT=bundlerunner
+PROJECT=bundletester
 
 all: lint test
 
