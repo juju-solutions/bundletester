@@ -41,7 +41,7 @@ def configure():
     parser.add_argument('-s', '--skip-implicit', action="store_true",
                         help="Don't include automatically generated tests")
     parser.add_argument('--test-pattern', dest="test_pattern")
-    parser.add_argument('-t', '--testdir', default='.')
+    parser.add_argument('-t', '--testdir')
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
 
@@ -59,6 +59,8 @@ def find_testdir(testdir):
             testdir = os.path.abspath(os.getcwd())
             if not testdir or not os.path.exists(testdir):
                 raise OSError("Cannot find tests location")
+        else:
+            testdir = '.'
     return testdir
 
 
