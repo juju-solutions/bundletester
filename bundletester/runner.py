@@ -3,6 +3,7 @@ import logging
 import os
 import subprocess
 
+from bundletester import builder
 from bundletester.spec import Suite
 
 log = logging.getLogger('runner')
@@ -22,10 +23,16 @@ def find(filenames, basefile):
 
 
 class Runner(object):
-    def __init__(self, suite, builder, options=None):
+    def __init__(self, suite, options=None):
         self.suite = suite
-        self.builder = builder
+        self._builder = None
         self.options = options
+
+    @property
+    def builder(self):
+        if not self._builder:
+            self._builder = builder.Builder(self.suite.config, self.options)
+        return self._builder
 
     def _run(self, executable):
         log.debug("call %s" % executable)
@@ -65,10 +72,7 @@ class Runner(object):
             ec, output = self._run(canidate)
             result['returncode'] = ec
             result['output'] = output
-            executable = spec.executable
-            if not isinstance(executable, list):
-                executable = [executable]
-            result['executable'] = executable
+            result['executable'] = spec.executable
             if ec != 0:
                 if isinstance(canidate, list):
                     canidate = " ".join(canidate)
@@ -82,6 +86,18 @@ class Runner(object):
             result['duration'] = 0.0
         return result
 
+    def build(self):
+        # if we are already in a venv we will assume we
+        # can use that
+        if self.suite.config.virtualenv and not os.environ.get("VIRTUAL_ENV"):
+            vpath = os.path.join(self.directory, '.venv')
+            self.builder.build_virtualenv(vpath)
+            apath = os.path.join(vpath, 'bin/activate_this.py')
+            execfile(apath, dict(__file__=apath))
+
+        self.builder.add_sources(self.suite.config.sources)
+        self.builder.install_packages()
+
     def _handle_result(self, result):
         stop = False
         if self.options and self.options.failfast and \
@@ -91,6 +107,7 @@ class Runner(object):
         return result, stop
 
     def __call__(self):
+        self.build()
         bootstrapped = False
         for element in self.suite:
             if isinstance(element, Suite):

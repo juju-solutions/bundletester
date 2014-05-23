@@ -3,7 +3,6 @@ import pkg_resources
 import logging
 import unittest
 
-from bundletester import builder
 from bundletester import config
 from bundletester import spec
 from bundletester import runner
@@ -31,11 +30,12 @@ class TestRunner(unittest.TestCase):
         options.environment = 'local'
         options.failfast = True
 
-        env = builder.Builder(parser, options)
-        suite = spec.Suite(config=parser, options=options)
+        suite = spec.Suite({'name': 'testdir',
+                            'directory': TEST_FILES,
+                            'testdir': TEST_FILES}, options=options)
         suite.spec(locate('test02'))
         self.assertEqual(suite[0].name, 'test02')
-        run = runner.Runner(suite, env, options)
+        run = runner.Runner(suite)
         results = list(run())
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['returncode'], 0)
