@@ -1,0 +1,28 @@
+
+cloudfoundry-base:
+  series: trusty
+  services:
+    nats:
+      charm: cf-nats
+      branch: lp:~cf-charmers/charms/trusty/cf-nats/trunk
+      constraints: arch=amd64
+    cc:
+      charm: cf-cloud-controller
+      branch: lp:~cf-charmers/charms/trusty/cf-cloud-controller/trunk
+      constraints: arch=amd64
+    dea:
+      charm: cf-dea
+      constraints: arch=amd64
+      branch: lp:~cf-charmers/charms/trusty/cf-dea/trunk
+    uaa:
+      charm: cf-uaa
+      constraints: arch=amd64
+      branch: lp:~cf-charmers/charms/trusty/cf-uaa/trunk
+    router:
+      charm: cf-go-router
+      constraints: arch=amd64
+      branch: lp:~cf-charmers/charms/trusty/cf-go-router/trunk
+  relations:
+    - [nats, [cc, uaa, router, dea]]
+    - [router, [uaa, cc]]
+
