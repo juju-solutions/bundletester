@@ -104,7 +104,6 @@ class Suite(list):
         if isinstance(self.model, models.Charm):
             if not self.options.skip_implicit:
                 self.find_implicit_tests()
-            self.find_tests()
         elif isinstance(self.model, models.Bundle):
             deployment = utils.fetch_deployment(self.control,
                                                 self.options.deployment)
@@ -115,8 +114,7 @@ class Suite(list):
                 charm_suite.find_suite()
                 if len(charm_suite):
                     self.insert(0, charm_suite)
-        else:
-            self.find_tests()
+        self.find_tests()
 
     def conditional_make(self, target, entitydir, suite=None):
         cwd = os.getcwd()
