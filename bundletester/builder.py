@@ -27,25 +27,33 @@ class Builder(object):
         ec = subprocess.call(['juju', 'status', '-e', self.env_name],
                              stdout=open('/dev/null', 'w'),
                              stderr=subprocess.STDOUT)
+
         if ec != 0:
-            if self.config.boostrap:
+            if self.config.bootstrap is True:
+                logging.info("Bootstapping Juju Environment...")
                 self.environment.bootstrap()
         else:
             self.environment.connect()
 
-    def deploy(self, spec):
-        if not spec.bundle:
-            return True
-        if not os.path.exists(spec.bundle):
-            raise OSError("Missing required bundle file: %s" % spec.bundle)
+    def deploy(self, bundle):
+        result = {
+            'returncode': 0
+        }
+        bundle = bundle or self.options.bundle
+        if not bundle:
+            return result
+        if not os.path.exists(bundle):
+            raise OSError("Missing required bundle file: %s" % bundle)
         if self.options.dryrun:
-            return True
+            return result
         cmd = ['juju-deployer']
         if self.options.verbose:
             cmd.append('-Wvd')
-        cmd += ['-c', spec.bundle]
+        cmd += ['-c', bundle]
         if self.options.deployment:
             cmd.append(self.options.deployment)
+
+        logging.debug("deploy %s", ' '.join(cmd))
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
         ec = p.wait()
@@ -60,7 +68,7 @@ class Builder(object):
         subprocess.check_call(['juju', 'destroy-environment', self.env_name])
 
     def reset(self):
-        if self.environment and self.config.reset:
+        if self.environment:
             self.environment.reset(terminate_machines=True)
 
     def build_virtualenv(self, path):

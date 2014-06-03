@@ -39,6 +39,7 @@ def configure():
                         action="store_false")
     parser.add_argument('-s', '--skip-implicit', action="store_true",
                         help="Don't include automatically generated tests")
+    parser.add_argument('-x', '--exclude', dest="exclude", action="append")
     parser.add_argument('--test-pattern', dest="test_pattern")
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()

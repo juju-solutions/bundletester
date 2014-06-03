@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 
-from bundletester import builder
+from bundletester import builder, models
 from bundletester.spec import Suite
 
 log = logging.getLogger('runner')
@@ -20,6 +20,10 @@ def find(filenames, basefile):
         if isinstance(f, list):
             f = f[0]
             yield os.path.abspath(os.path.join(dirname, f))
+
+
+class DeployError(Exception):
+    pass
 
 
 class Runner(object):
@@ -102,13 +106,16 @@ class Runner(object):
         stop = False
         if self.options and self.options.failfast and \
                 result.get('returncode', 1) != 0:
-            log.debug('Failfast from %s' % result['test'])
             stop = True
         return result, stop
 
     def __call__(self):
         self.build()
         bootstrapped = False
+        if not bootstrapped:
+            self.builder.bootstrap()
+            bootstrapped = True
+
         for element in self.suite:
             if isinstance(element, Suite):
                 for result in self._run_suite(element):
@@ -117,13 +124,21 @@ class Runner(object):
                     if stop:
                         raise StopIteration
             else:
-                if not bootstrapped and element.bundle:
-                    self.builder.bootstrap()
-                    bootstrapped = True
                 result, stop = self._handle_result(self._run_test(element))
                 yield result
                 if stop:
                     raise StopIteration
+
+    def _deploy(self, spec):
+        deployed = self.builder.deploy(spec)
+        if not deployed or deployed and deployed.get('returncode') != 0:
+            exc = DeployError()
+            exc.result = result = {}
+            result['test'] = 'juju-deployer'
+            result['suite'] = 'bundletester'
+            result['exit'] = 'juju-deployer'
+            exc.result.update(deployed)
+            raise exc
 
     def _run_suite(self, suite):
         for spec in suite:
@@ -133,27 +148,29 @@ class Runner(object):
         result = {}
         cwd = os.getcwd()
         try:
-            if spec.bundle:
-                deployed = self.builder.deploy(spec)
-                if deployed is not True:
-                    result.update(deployed)
-                    result['returncode'] = 2
-                    result['test'] = 'juju-deployer'
-                    result['suite'] = 'bundletester'
-                    result['exit'] = result['executable']
-
-            if result.get('returncode') is None:
-                basedir = spec.get('dirname')
-                if basedir:
-                    result['dirname'] = basedir
-                    os.chdir(basedir)
-                result.update(self.run(spec, 'setup'))
-                if result.get('returncode', None) == 0:
-                    result.update(self.run(spec))
+            if isinstance(spec.suite.model, models.Bundle):
+                self._deploy(spec.bundle)
+                if spec.reset:
+                    self.builder.reset()
+            basedir = spec.get('dirname')
+            if basedir:
+                result['dirname'] = basedir
+                os.chdir(basedir)
+            result.update(self.run(spec, 'setup'))
+            if result.get('returncode', 0) == 0:
+                result.update(self.run(spec))
+        except DeployError, e:
+            result.update(e.result)
+        except KeyboardInterrupt:
+            result['returncode'] = 1
         except subprocess.CalledProcessError, e:
             result['returncode'] = e.returncode
             result['output'] = e.output
             result['executable'] = e.cmd
+        except OSError:
+            print "Invalid Executable", spec
+        except Exception, e:
+            print "unhandled error", e
         finally:
             os.chdir(cwd)
             td = self.run(spec, 'teardown')
@@ -163,6 +180,6 @@ class Runner(object):
                 # otherwise a successful teardown could overwrite
                 # the failure code of a main phase test
                 result.update(td)
-            self.builder.reset()
-            result['suite'] = spec.get('suite')
+            suite = spec.get('suite')
+            result['suite'] = suite and suite.name or None
             return result

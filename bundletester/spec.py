@@ -36,10 +36,7 @@ def Spec(cmd, parent=None, dirname=None, suite=None, name=None):
     result['name'] = name or os.path.basename(testfile)
     result['executable'] = cmd
     result['dirname'] = dirname
-    if suite:
-        result['suite'] = suite
-    if result.bundle:
-        result.bundle = normalize_path(result.bundle, result.executable)
+    result['suite'] = suite
     return result
 
 
@@ -54,7 +51,8 @@ class Suite(list):
         self.directory = model['directory']
         self.testdir = model['testdir']
         self.name = model.get('name')
-        self.control = model.get('bundle', model.get('metadata'))
+        if not self.config.bundle:
+            self.config.bundle = model.get('bundle')
 
     def __len__(self):
         l = 0
@@ -79,8 +77,19 @@ class Suite(list):
     def spec(self, testfile, **kwargs):
         self.append(Spec(testfile, self.config, **kwargs))
 
+    def excluded(self):
+        if not self.options.exclude:
+            self.options.exclude = []
+        excludes = set(self.options.exclude).union(set(self.config.excludes))
+        for exclude in excludes:
+            if exclude in self.name:
+                return True
+        return False
+
     def find_tests(self):
         if not self.testdir:
+            return
+        if self.excluded():
             return
         testpat = self.options.test_pattern or \
             self.config.get('tests', 'test*')
@@ -91,7 +100,7 @@ class Suite(list):
             tests = tests.intersection(set(filterset))
         for test in sorted(tests):
             if os.access(test, os.X_OK | os.R_OK):
-                self.spec(test, dirname=self.testdir, suite=self.name)
+                self.spec(test, dirname=self.testdir, suite=self)
 
     def find_suite(self):
         """Find and prepend charms tests to our suite of tests.
@@ -101,11 +110,14 @@ class Suite(list):
         If only one target exists and deployment is not specified it will be
         used automatically when searching for tests.
         """
-        if isinstance(self.model, models.Charm):
+        if self.excluded():
+            return
+        if isinstance(self.model, (models.Bundle, models.Charm)):
             if not self.options.skip_implicit:
                 self.find_implicit_tests()
-        elif isinstance(self.model, models.Bundle):
-            deployment = utils.fetch_deployment(self.control,
+
+        if isinstance(self.model, models.Bundle):
+            deployment = utils.fetch_deployment(self.config.bundle,
                                                 self.options.deployment)
             for charm in deployment.get_charms():
                 model = models.Charm.from_deployer_charm(charm)
@@ -138,10 +150,10 @@ class Suite(list):
         # common targets will be attempted.
         # This is a charm suite
         self.spec(['charm-proof'],
-                  dirname=self.model['directory'], suite=self.name)
+                  dirname=self.model['directory'], suite=self)
         for target in self.config.makefile:
             self.conditional_make(target, self.model['directory'],
-                                  suite=self.name)
+                                  suite=self)
 
 
 def filter_yamls(yamls):
@@ -186,7 +198,7 @@ def BundleClassifier(directory):
         result.update(data)
         if 'name' not in data:
             metadata = yaml.safe_load(bundle)
-            # XXX: ambigious
+            # XXX: ambiguous
             result['name'] = metadata.keys(0)
     return models.Bundle(**result)
 

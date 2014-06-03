@@ -9,6 +9,7 @@ class Parser(dict):
             'bundle': None,
             'virtualenv': True,
             'tests': "[0-9]*",
+            'excludes': [],
             'sources': [],
             'packages': [],
             'makefile': ['lint', 'test'],

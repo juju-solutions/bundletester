@@ -23,10 +23,13 @@ def normalize_bundle_location(bundle_location):
     raise ValueError("Expected bundle location")
 
 
-def get_bundle(bundle_location, target="bundle"):
+def get_bundle(bundle_location, target="bundle", devel=False):
     bundle_location = normalize_bundle_location(bundle_location)
-    subprocess.check_call(['bzr', 'checkout', '--lightweight',
-                           bundle_location, target])
+    args = ['bzr', 'checkout']
+    if not devel:
+        args.append('--lightweight')
+    args.extend([bundle_location, target])
+    subprocess.check_call(args)
 
 
 def get_bzr_revno(dirname):
@@ -50,6 +53,7 @@ def setup_parser():
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
     parser.add_argument('-d', '--deployment')
+    parser.add_argument('-D', '--devel', action="store_true", dest="devel")
     parser.add_argument('-r', '--revisions')
     parser.add_argument('-b', '--bundle-only',
                         action="store_true", dest="bundle_only")
@@ -70,7 +74,7 @@ def main():
         os.chdir(tmpdir)
 
     logging.info("Fetching Bundle")
-    get_bundle(options.bundle)
+    get_bundle(options.bundle, devel=options.devel)
     configs = glob.glob('bundle/*.yaml')
     if not configs:
         raise ValueError("%s missing YAML files" % options.bundle)
