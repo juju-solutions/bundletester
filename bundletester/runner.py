@@ -113,8 +113,7 @@ class Runner(object):
         self.build()
         bootstrapped = False
         if not bootstrapped:
-            self.builder.bootstrap()
-            bootstrapped = True
+            bootstrapped = self.builder.bootstrap()
 
         for element in self.suite:
             if isinstance(element, Suite):
@@ -128,6 +127,9 @@ class Runner(object):
                 yield result
                 if stop:
                     raise StopIteration
+
+        if bootstrapped:
+            self.builder.destroy()
 
     def _deploy(self, spec):
         deployed = self.builder.deploy(spec)

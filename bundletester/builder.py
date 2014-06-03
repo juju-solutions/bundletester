@@ -32,6 +32,7 @@ class Builder(object):
             if self.config.bootstrap is True:
                 logging.info("Bootstapping Juju Environment...")
                 self.environment.bootstrap()
+                return True
         else:
             self.environment.connect()
 
@@ -65,7 +66,8 @@ class Builder(object):
         }
 
     def destroy(self):
-        subprocess.check_call(['juju', 'destroy-environment', self.env_name])
+        subprocess.check_call(['juju', 'destroy-environment',
+                               '-y', self.env_name])
 
     def reset(self):
         if self.environment:
