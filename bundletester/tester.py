@@ -25,6 +25,8 @@ def configure():
     parser.add_argument('-b', '-c', '--bundle')
     parser.add_argument('-d', '--deployment')
 
+    parser.add_argument('--no-destroy', action="store_true")
+
     parser.add_argument('-l', '--log-level', dest="log_level",
                         default=logging.INFO)
     parser.add_argument('-o', '--output', dest="output",

@@ -66,8 +66,9 @@ class Builder(object):
         }
 
     def destroy(self):
-        subprocess.check_call(['juju', 'destroy-environment',
-                               '-y', self.env_name])
+        if self.options.no_destroy is not True:
+            subprocess.check_call(['juju', 'destroy-environment',
+                                   '-y', self.env_name])
 
     def reset(self):
         if self.environment:

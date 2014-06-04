@@ -208,7 +208,7 @@ def CharmClassifier(directory):
     if not os.path.exists(metadata):
         return None
     lp = vcs.Launchpad()
-    data = lp.infer_charm(directory)
+    data = lp.infer_charm(directory) or {}
     testdir = utils.find_testdir(directory)
     metadata = yaml.safe_load(metadata)
     if data:
