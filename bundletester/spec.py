@@ -75,6 +75,8 @@ class Suite(list):
         return self._config
 
     def spec(self, testfile, **kwargs):
+        if 'suite' not in kwargs:
+            kwargs['suite'] = self
         self.append(Spec(testfile, self.config, **kwargs))
 
     def excluded(self):
@@ -149,7 +151,8 @@ class Suite(list):
         # charm tools and for bundles and charms with Makefiles
         # common targets will be attempted.
         # This is a charm suite
-        self.spec(['charm-proof'],
+        proof = ['charm-proof']
+        self.spec(proof,
                   dirname=self.model['directory'], suite=self)
         for target in self.config.makefile:
             self.conditional_make(target, self.model['directory'],

@@ -29,7 +29,8 @@ class Launchpad(object):
         if not origin:
             return None
         # we have a bzr branch, see if its a proper charm
-        match = re.search('charms/(?P<series>\w+)/(?P<name>[\w\d\-]+)/', origin)
+        match = re.search('charms/(?P<series>\w+)/(?P<name>[\w\d\-]+)/',
+                          origin)
         if not match:
             return None
 

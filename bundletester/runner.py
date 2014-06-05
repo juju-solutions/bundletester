@@ -9,17 +9,23 @@ from bundletester.spec import Suite
 log = logging.getLogger('runner')
 
 
-def find(filenames, basefile):
-    """Normalize files relative to basefile turning
-    partial names into files in the same dir as basefile
+def relative_to(filenames, basefile):
+    """Normalize files relative to basefile turning partial names into files in
+    the same dir as basefile
     """
+    results = []
     if isinstance(basefile, list):
         basefile = basefile[0]
+    if basefile is None:
+        return results
     dirname = os.path.dirname(basefile)
     for f in filenames:
         if isinstance(f, list):
             f = f[0]
-            yield os.path.abspath(os.path.join(dirname, f))
+        path = os.path.abspath(os.path.join(dirname, f))
+        if os.path.exists(path):
+            results.append(path)
+    return results
 
 
 class DeployError(Exception):
@@ -48,7 +54,7 @@ class Runner(object):
                              stderr=subprocess.STDOUT)
         retcode = p.wait()
         output = p.stdout.read()
-        log.debug("OUTPUT\n%s" % output)
+        log.debug("\n%s" % output)
         log.debug("Exit Code: %s" % retcode)
         return retcode, output
 
@@ -63,9 +69,10 @@ class Runner(object):
         }
 
         if phase == "setup":
-            canidates = find(spec.setup, spec.executable)
+            canidates = relative_to(spec.setup, spec.suite.testdir)
         elif phase == "teardown":
-            canidates = find(reversed(spec.teardown), spec.executable)
+            canidates = relative_to(reversed(spec.teardown),
+                                    spec.suite.testdir)
         else:
             canidates = [spec.executable]
 
@@ -83,11 +90,12 @@ class Runner(object):
                 result['exit'] = canidate
                 break
 
-        end = datetime.datetime.utcnow()
-        duration = end - start
-        result['duration'] = duration.total_seconds()
-        if result['duration'] < 0.1:
-            result['duration'] = 0.0
+        if not phase:
+            end = datetime.datetime.utcnow()
+            duration = end - start
+            result['duration'] = duration.total_seconds()
+            if result['duration'] < 0.1:
+                result['duration'] = 0.0
         return result
 
     def build(self):
@@ -111,10 +119,7 @@ class Runner(object):
 
     def __call__(self):
         self.build()
-        bootstrapped = False
-        if not bootstrapped:
-            bootstrapped = self.builder.bootstrap()
-
+        bootstrapped = self.builder.bootstrap()
         for element in self.suite:
             if isinstance(element, Suite):
                 for result in self._run_suite(element):
@@ -169,10 +174,8 @@ class Runner(object):
             result['returncode'] = e.returncode
             result['output'] = e.output
             result['executable'] = e.cmd
-        except OSError:
-            print "Invalid Executable", spec
         except Exception, e:
-            print "unhandled error", e
+            result['output'] += str(e)
         finally:
             os.chdir(cwd)
             td = self.run(spec, 'teardown')

@@ -4,6 +4,7 @@ import logging
 import unittest
 
 from bundletester import config
+from bundletester import models
 from bundletester import spec
 from bundletester import runner
 
@@ -29,13 +30,15 @@ class TestRunner(unittest.TestCase):
         options.dryrun = True
         options.environment = 'local'
         options.failfast = True
+        model = models.TestDir({'name': 'testdir',
+                                'directory': TEST_FILES,
+                                'testdir': TEST_FILES})
 
-        suite = spec.Suite({'name': 'testdir',
-                            'directory': TEST_FILES,
-                            'testdir': TEST_FILES}, options=options)
+        suite = spec.Suite(model, options=options)
         suite.spec(locate('test02'))
         self.assertEqual(suite[0].name, 'test02')
-        run = runner.Runner(suite)
+        run = runner.Runner(suite, options)
+
         results = list(run())
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['returncode'], 0)
