@@ -4,8 +4,8 @@ import yaml
 class Parser(dict):
     def __defaults__(self):
         return {
-            'bootstrap': False,
-            'reset': False,
+            'bootstrap': True,
+            'reset': True,
             'bundle': None,
             'virtualenv': True,
             'tests': "[0-9]*",
