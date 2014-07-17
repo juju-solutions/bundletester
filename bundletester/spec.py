@@ -196,13 +196,12 @@ def BundleClassifier(directory):
     result = {'bundle': bundle,
               'testdir': utils.find_testdir(directory)}
     lp = vcs.Launchpad()
-    data = lp.infer_bundle(directory)
-    if data:
-        result.update(data)
-        if 'name' not in data:
-            metadata = yaml.safe_load(bundle)
-            # XXX: ambiguous
-            result['name'] = metadata.keys(0)
+    data = lp.infer_bundle(directory) or {}
+    result.update(data)
+    if 'name' not in data:
+        metadata = yaml.safe_load(open(bundle))
+        # XXX: ambiguous
+        result['name'] = metadata.keys()[0]
     return models.Bundle(**result)
 
 
@@ -213,12 +212,11 @@ def CharmClassifier(directory):
     lp = vcs.Launchpad()
     data = lp.infer_charm(directory) or {}
     testdir = utils.find_testdir(directory)
-    metadata = yaml.safe_load(metadata)
-    if data:
-        data['metadata'] = metadata
-        data['testdir'] = testdir
-        if 'name' not in data:
-            data['name'] = metadata['name']
+    metadata = yaml.safe_load(open(metadata))
+    data['metadata'] = metadata
+    data['testdir'] = testdir
+    if 'name' not in data:
+        data['name'] = metadata['name']
     return models.Charm(**data)
 
 
