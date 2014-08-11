@@ -173,6 +173,10 @@ def filter_yamls(yamls):
             continue
         for possible in data.values():
             if isinstance(possible, dict) and 'services' in possible:
+                keys = sorted(possible['services'].keys())
+                if keys == ['default', 'description', 'type']:
+                    # looks like a charm, not a bundle
+                    continue
                 result.append(yamlfn)
                 break
     return result
