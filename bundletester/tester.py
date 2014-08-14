@@ -61,7 +61,8 @@ def main():
 
     suite = spec.SuiteFactory(options, options.testdir)
     if not suite:
-        raise SystemExit("No Tests Found: Not a bundle or charm.")
+        sys.stderr.write("No Tests Found\n")
+        sys.exit(3)
 
     report = reporter.get_reporter(options.reporter, options.output, options)
     report.set_suite(suite)
