@@ -68,7 +68,7 @@ class Builder(object):
     def destroy(self):
         if self.options.no_destroy is not True:
             subprocess.check_call(['juju', 'destroy-environment',
-                                   '-y', self.env_name])
+                                   '-y', self.env_name, '--force'])
 
     def reset(self):
         if self.environment:
