@@ -8,7 +8,7 @@ class Parser(dict):
             'reset': True,
             'bundle': None,
             'virtualenv': True,
-            'tests': "[0-9]*",
+            'tests': "*",
             'excludes': [],
             'sources': [],
             'packages': [],

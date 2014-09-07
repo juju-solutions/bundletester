@@ -44,7 +44,7 @@ class TestSpec(unittest.TestCase):
         self.assertEqual(test.executable, [os.path.abspath(locate('test02'))])
         self.assertEqual(test.setup,  ['setup02'])
         self.assertEqual(test.bootstrap,  False)
-        self.assertEqual(test.reset,  False)
+        self.assertEqual(test.reset, True)
 
     def test_spec_init(self):
         parent = config.Parser()

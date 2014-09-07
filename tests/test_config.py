@@ -15,8 +15,8 @@ class TestConfig(unittest.TestCase):
 
     def test_parser_defaults(self):
         parser = config.Parser()
-        self.assertFalse(parser.bootstrap)
-        self.assertFalse(parser.reset)
+        self.assertTrue(parser.bootstrap)
+        self.assertTrue(parser.reset)
         self.assertTrue(parser.virtualenv)
         self.assertEqual(parser.sources, [])
         self.assertEqual(parser.packages, [])
@@ -25,8 +25,8 @@ class TestConfig(unittest.TestCase):
 
     def test_config_parse(self):
         parser = config.Parser(locate('sample.yaml'))
-        self.assertFalse(parser.bootstrap)
-        self.assertFalse(parser.reset)
+        self.assertTrue(parser.bootstrap)
+        self.assertTrue(parser.reset)
         self.assertTrue(parser.virtualenv)
         self.assertEqual(parser.sources, [])
         self.assertEqual(parser.packages, [])

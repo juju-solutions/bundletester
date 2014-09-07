@@ -49,9 +49,12 @@ class Runner(object):
         if self.options.dryrun:
             return 0, ""
 
-        p = subprocess.Popen(executable,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
+        p = subprocess.Popen(
+            executable,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=self.options.testdir,
+        )
         retcode = p.wait()
         output = p.stdout.read()
         log.debug("\n%s" % output)
