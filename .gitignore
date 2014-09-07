@@ -1,0 +1,5 @@
+.bzr/
+.venv/
+*.egg-info/
+*.pyc
+*.py.~*
