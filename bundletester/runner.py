@@ -55,8 +55,8 @@ class Runner(object):
             stderr=subprocess.STDOUT,
             cwd=self.options.testdir,
         )
-        retcode = p.wait()
-        output = p.stdout.read()
+        output, _ = p.communicate()
+        retcode = p.returncode
         log.debug("\n%s" % output)
         log.debug("Exit Code: %s" % retcode)
         return retcode, output

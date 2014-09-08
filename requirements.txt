@@ -1,7 +1,10 @@
-coverage==3.7.1
-mock==1.0.1
-nose==1.3.1
-PyYAML==3.11
-juju-deployer==0.3.5
+--allow-external lazr.authentication
+--allow-unverified lazr.authentication
+lazr.authentication
+charm-tools
+coverage
+mock
+nose
+juju-deployer
 bzr==2.6.0
-blessings==1.5.1
+blessings
