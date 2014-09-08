@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 SETUP = {
     'name': "bundletester",
     'packages': find_packages(),
-    'version': "0.3.5",
+    'version': "0.3.6",
     'author': "Juju Developers",
     'author_email': "juju@lists.ubuntu.com",
     'url': "https://github.com/juju-solutions/bundletester",
