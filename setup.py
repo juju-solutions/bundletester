@@ -20,6 +20,6 @@ SETUP = {
 
 if __name__ == '__main__':
     import subprocess
-    cmd = 'pip install -r requirements.txt'
+    cmd = 'pip install -r requirements.txt --no-clean'
     subprocess.call(cmd.split())
     setup(**SETUP)
