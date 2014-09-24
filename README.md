@@ -3,6 +3,16 @@ BundleTester
 
 A juju-deployer based test runner for bundles.
 
+Installation
+============
+
+    pip install bundletester \
+      --allow-external   lazr.authentication \
+      --allow-unverified lazr.authentication
+
+Introduction
+============
+
 This is designed around the fail fast principal. Each bundle is composed of
 charms, each of those charms should have tests ranging from unit tests to
 integration tests. The bundle itself will have integration tests. Those tests
@@ -23,7 +33,7 @@ trigger.
 Example Usage
 =============
 
-From within the top level of a bundle 
+From within the top level of a bundle
 
     bundletester -r json -o result.json
 

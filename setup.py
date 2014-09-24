@@ -1,4 +1,11 @@
+import os
 from setuptools import setup, find_packages
+
+this_dir = os.path.abspath(os.path.dirname(__file__))
+reqs_file = os.path.join(this_dir, 'requirements.txt')
+with open(reqs_file) as f:
+    reqs = [line for line in f.read().splitlines()
+            if not line.startswith('--')]
 
 SETUP = {
     'name': "bundletester",
@@ -15,11 +22,9 @@ SETUP = {
             'bundlewatcher = bundletester.watcher:main'
         ]
     },
+    'install_requires': reqs,
 }
 
 
 if __name__ == '__main__':
-    import subprocess
-    cmd = 'pip install -r requirements.txt --no-clean'
-    subprocess.call(cmd.split())
     setup(**SETUP)
