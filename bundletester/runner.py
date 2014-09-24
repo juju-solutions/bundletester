@@ -106,10 +106,9 @@ class Runner(object):
         # can use that
         if self.suite.config.virtualenv and not os.environ.get("VIRTUAL_ENV"):
             vpath = os.path.join(self.options.testdir, '.venv')
-            if os.path.exists(vpath):
-                self.builder.build_virtualenv(vpath)
-                apath = os.path.join(vpath, 'bin/activate_this.py')
-                execfile(apath, dict(__file__=apath))
+            self.builder.build_virtualenv(vpath)
+            apath = os.path.join(vpath, 'bin/activate_this.py')
+            execfile(apath, dict(__file__=apath))
 
         self.builder.add_sources(self.suite.config.sources)
         self.builder.install_packages()
