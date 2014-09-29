@@ -160,8 +160,8 @@ class Runner(object):
         try:
             if isinstance(spec.suite.model, models.Bundle):
                 self._deploy(spec.bundle)
-                if spec.reset:
-                    self.builder.reset()
+            if spec.reset:
+                self.builder.reset()
             basedir = spec.get('dirname')
             if basedir:
                 result['dirname'] = basedir

@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import time
 
 from deployer.env.go import GoEnvironment
 
@@ -30,8 +31,9 @@ class Builder(object):
 
         if ec != 0:
             if self.config.bootstrap is True:
-                logging.info("Bootstapping Juju Environment...")
+                logging.info("Bootstrapping Juju Environment...")
                 self.environment.bootstrap()
+                self.environment.connect()
                 return True
         else:
             self.environment.connect()
@@ -73,6 +75,21 @@ class Builder(object):
     def reset(self):
         if self.environment:
             self.environment.reset(terminate_machines=True)
+            # wait for all services to be removed
+            logging.debug("Waiting for services to be removed...")
+            timeout = 600  # seconds
+            start = time.time()
+            while True:
+                status = self.environment.status()
+                if not status.get('services', {}):
+                    break
+                if (time.time() - start) > timeout:
+                    raise RuntimeError(
+                        'Timeout exceeded. Failed to destroy all services '
+                        ' in %s seconds.' % timeout)
+                logging.debug(
+                    " Remaining services: %s", status.get("services").keys())
+                time.sleep(4)
 
     def build_virtualenv(self, path):
         subprocess.check_call(['virtualenv', path],
