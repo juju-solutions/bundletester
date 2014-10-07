@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import subprocess
+import traceback
 
 from bundletester import builder, models
 from bundletester.spec import Suite
@@ -178,7 +179,10 @@ class Runner(object):
             result['output'] = e.output
             result['executable'] = e.cmd
         except Exception, e:
-            result['output'] += str(e)
+            log.exception(e)
+            result['returncode'] = 1
+            result['output'] = '{}\n{}'.format(
+                result.get('output', ''), traceback.format_exc())
         finally:
             os.chdir(cwd)
             td = self.run(spec, 'teardown')
