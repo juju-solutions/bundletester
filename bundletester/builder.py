@@ -74,11 +74,23 @@ class Builder(object):
 
     def reset(self):
         if self.environment:
-            self.environment.reset(terminate_machines=True)
+            start, timeout = time.time(), 60
+            while True:
+                try:
+                    self.environment.reset(terminate_machines=True)
+                    break
+                except Exception as e:
+                    logging.exception(e)
+                    if (time.time() - start) > timeout:
+                        raise RuntimeError(
+                            'Timeout exceeded. Failed to reset environment '
+                            ' in %s seconds.' % timeout)
+                    time.sleep(1)
+                    logging.debug('Retrying environment reset...')
+
             # wait for all services to be removed
             logging.debug("Waiting for services to be removed...")
-            timeout = 600  # seconds
-            start = time.time()
+            start, timeout = time.time(), 600
             while True:
                 status = self.environment.status()
                 if not status.get('services', {}):
