@@ -1,5 +1,10 @@
+from contextlib import contextmanager
+import logging
 import os
+
 from deployer.config import ConfigStack
+
+log = logging.getLogger(__name__)
 
 
 def fetch_deployment(bundle_yaml, deployment=None):
@@ -22,3 +27,17 @@ def find_testdir(directory):
     if os.path.exists(testdir):
         return os.path.abspath(testdir)
     return None
+
+
+@contextmanager
+def juju_env(env):
+    orig_env = os.environ.get('JUJU_ENV', '')
+    if env != orig_env:
+        log.debug('Updating JUJU_ENV: "%s" -> "%s"', orig_env, env)
+        os.environ['JUJU_ENV'] = env
+    try:
+        yield
+    finally:
+        if env != orig_env:
+            log.debug('Updating JUJU_ENV: "%s" -> "%s"', env, orig_env)
+            os.environ['JUJU_ENV'] = orig_env

@@ -5,7 +5,12 @@ import subprocess
 import sys
 
 
-from bundletester import (spec, runner, reporter)
+from bundletester import (
+    reporter,
+    runner,
+    spec,
+    utils,
+)
 
 
 def current_environment():
@@ -69,7 +74,8 @@ def main():
     run = runner.Runner(suite, options)
     report.header()
     if len(suite):
-        [report.emit(result) for result in run()]
+        with utils.juju_env(options.environment):
+            [report.emit(result) for result in run()]
     report.summary()
     report.exit()
 
