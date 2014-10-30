@@ -101,7 +101,7 @@ class Suite(list):
                          in self.options.tests]
             tests = tests.intersection(set(filterset))
         for test in sorted(tests):
-            if os.access(test, os.X_OK | os.R_OK):
+            if os.path.isfile(test) and os.access(test, os.X_OK | os.R_OK):
                 self.spec(test, dirname=self.testdir, suite=self)
 
     def find_suite(self):
