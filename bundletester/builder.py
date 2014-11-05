@@ -3,6 +3,7 @@ import os
 import subprocess
 import time
 
+import websocket
 from deployer.env.go import GoEnvironment
 
 
@@ -81,6 +82,12 @@ class Builder(object):
                     break
                 except Exception as e:
                     logging.exception(e)
+
+                    if isinstance(e, websocket.WebSocketConnectionClosedException):
+                        logging.debug('Reconnectinng to environment...')
+                        self.environment.connect()
+                        continue
+
                     if (time.time() - start) > timeout:
                         raise RuntimeError(
                             'Timeout exceeded. Failed to reset environment '

@@ -8,3 +8,4 @@ nose
 juju-deployer
 bzr==2.6.0
 blessings
+websocket-client
