@@ -33,7 +33,11 @@ class Builder(object):
         if ec != 0:
             if self.config.bootstrap is True:
                 logging.info("Bootstrapping Juju Environment...")
-                self.environment.bootstrap()
+                if self.options.constraints:
+                    logging.debug(
+                        "Bootstrap constraints: %s", self.options.constraints)
+                self.environment.bootstrap(
+                    constraints=self.options.constraints)
                 self.environment.connect()
                 return True
         else:
@@ -81,13 +85,13 @@ class Builder(object):
                     self.environment.reset(terminate_machines=True)
                     break
                 except Exception as e:
-                    logging.exception(e)
-
                     if isinstance(e, websocket.WebSocketConnectionClosedException):
-                        logging.debug('Reconnectinng to environment...')
+                        logging.debug(
+                            'Websocket connection closed, reconnecting...')
                         self.environment.connect()
                         continue
 
+                    logging.exception(e)
                     if (time.time() - start) > timeout:
                         raise RuntimeError(
                             'Timeout exceeded. Failed to reset environment '
