@@ -56,6 +56,12 @@ class Runner(object):
             stderr=subprocess.STDOUT,
             cwd=self.options.testdir,
         )
+
+        # Print all output as it comes in to debug
+        lines = iter(p.stdout.readline, "")
+        for line in lines:
+            log.debug(str(line.rstrip()))
+
         output, _ = p.communicate()
         retcode = p.returncode
         log.debug("\n%s" % output)
