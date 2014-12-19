@@ -74,6 +74,8 @@ class Builder(object):
                                    '-y', self.env_name, '--force'])
 
     def reset(self):
+        if self.options.dryrun:
+            return
         if self.environment:
             start, timeout = time.time(), 60
             while True:
