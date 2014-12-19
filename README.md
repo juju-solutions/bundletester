@@ -6,9 +6,7 @@ A juju-deployer based test runner for bundles.
 Installation
 ============
 
-    pip install bundletester \
-      --allow-external   lazr.authentication \
-      --allow-unverified lazr.authentication
+    pip install bundletester
 
 Introduction
 ============

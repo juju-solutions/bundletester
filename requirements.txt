@@ -1,5 +1,3 @@
---allow-external lazr.authentication
---allow-unverified lazr.authentication
 lazr.authentication
 charm-tools
 coverage
