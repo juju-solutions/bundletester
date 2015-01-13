@@ -58,15 +58,16 @@ class Runner(object):
         )
 
         # Print all output as it comes in to debug
+        output = []
         lines = iter(p.stdout.readline, "")
         for line in lines:
+            output.append(line)
             log.debug(str(line.rstrip()))
 
-        output, _ = p.communicate()
+        p.communicate()
         retcode = p.returncode
-        log.debug("\n%s" % output)
         log.debug("Exit Code: %s" % retcode)
-        return retcode, output
+        return retcode, '\n'.join(output)
 
     def run(self, spec, phase=None):
         """Run a phase of spec.
