@@ -31,21 +31,69 @@ trigger.
 Example Usage
 =============
 
-From within the top level of a bundle
+From within the top level of a bundle or charm
 
     bundletester -r json -o result.json
 
-Using a specific directory of tests
+Using a specific bundle or charm directory
 
-    bundletester -t 'pwd`
-
-Using the -t/--testdir directive you can also run the tests from a charm
-directory with all the default config.
-
-    bundletester -l DEBUG -o result --testdir charm/tests
+    bundletester -t ~/charms/trusty/mycharm -l DEBUG
 
 Passing -l/--log-level DEBUG will give additional insight into what steps
 bundletester is taking.
+
+Remote Sources
+--------------
+
+`bundletester` can fetch and run tests from remote locations:
+
+    bundletester -t cs:trusty/wordpress
+
+The `-t` option accepts a variety of URL types:
+
+Charm Store
++++++++++++
+
+    -t cs:wordpress
+    -t cs:precise/wordpress
+    -t bundle:mediawiki/single
+    -t bundle:mediawiki/6/single
+    -t bundle:~charmers/mediawiki/single
+    -t bundle:~charmers/mediawiki/6/single
+
+Launchpad
++++++++++
+
+    -t lp:~charmers/charms/precise/ghost/trunk
+    -t launchpad:~charmers/charms/precise/ghost/trunk
+    -t https://launchpad.net/~charmers/charms/precise/ghost/trunk
+
+    # Add '@revision' to any Launchpad URL to test a specific revision
+    -t lp:~charmers/charms/precise/ghost/trunk@4
+
+    # Test charm or bundle merge proposal
+    -t lp:~davidpbritton/charms/precise/apache2/avoid-regen-cert/+merge/221102
+
+Github
+++++++
+
+    -t gh:charms/apache2
+    -t github:charms/apache2
+    -t https://github.com/charms/apache2
+
+    # Add '@revision' to any Github URL to test a specific revision
+    -t https://github.com/charms/apache2@52e73d
+
+Bitbucket
++++++++++
+
+    # For Bitbucket, repos that don't end in '.git' are assumed to be Hg
+    -t bb:battlemidget/juju-apache-gunicorn-django.git
+    -t bitbucket:battlemidget/juju-apache-gunicorn-django.git
+    -t https://bitbucket.org/battlemidget/juju-apache-gunicorn-django.git
+
+    # Add '@revision' to any Bitbucket URL to test a specific revision
+    -t bb:battlemidget/juju-apache-gunicorn-django.git@daff5d9
 
 Test Directory
 ==============
