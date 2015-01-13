@@ -135,7 +135,7 @@ class LocalFetcher(Fetcher):
             os.path.join(os.getcwd(), os.path.expanduser(url)))
         if os.path.exists(src):
             return dict(path=src)
-        return None
+        return {}
 
     def fetch(self, dir_):
         dst = os.path.join(dir_, os.path.basename(self.path.rstrip('/')))
