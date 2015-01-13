@@ -85,7 +85,8 @@ class Builder(object):
                 except Exception as e:
                     logging.exception(e)
 
-                    if isinstance(e, websocket.WebSocketConnectionClosedException):
+                    if isinstance(
+                            e, websocket.WebSocketConnectionClosedException):
                         logging.debug('Reconnectinng to environment...')
                         self.environment.connect()
                         continue

@@ -1,9 +1,11 @@
-lazr.authentication
-charm-tools
-coverage
-mock
-nose
-juju-deployer
 bzr==2.6.0
 blessings
+charm-tools
+charmworldlib
+coverage
+juju-deployer
+lazr.authentication
+mock
+nose
+requests
 websocket-client

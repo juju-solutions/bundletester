@@ -3,6 +3,7 @@ import logging
 import os
 import subprocess
 import sys
+import tempfile
 
 
 from bundletester import (
@@ -10,6 +11,7 @@ from bundletester import (
     runner,
     spec,
     utils,
+    fetchers,
 )
 
 
@@ -63,6 +65,14 @@ def main():
 
     if not options.output:
         options.output = sys.stdout
+
+    try:
+        fetcher = fetchers.get_fetcher(options.testdir)
+        options.testdir = fetcher.fetch(
+            tempfile.mkdtemp(prefix='bundletester-'))
+    except fetchers.FetchError as e:
+        sys.stderr.write("{}\n".format(e))
+        sys.exit(1)
 
     suite = spec.SuiteFactory(options, options.testdir)
     if not suite:
