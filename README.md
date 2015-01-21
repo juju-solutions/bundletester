@@ -113,25 +113,25 @@ A sample `tests.yaml` file::
 
 Explanation of keys:
 
-*bootstrap*: Allow bootstrap of current env, default: true
+**bootstrap**: Allow bootstrap of current env, default: true
 
-*reset*: Use juju-deployer to reset env between test, default: true
+**reset**: Use juju-deployer to reset env between test, default: true
 
-*setup*: optional name of script in test dir to run before each test
+**setup**: optional name of script in test dir to run before each test
 
-*teardown*: optional name of script to run after each test
+**teardown**: optional name of script to run after each test
 
-*tests*: glob of files in testdir to treat as tests, only executable
+**tests**: glob of files in testdir to treat as tests, only executable
        files will be used.
 
-*virtualenv*: create and activate a virutalenv for the running of all tests
+**virtualenv**: create and activate a virutalenv for the running of all tests
 defaults to true
 
-*sources*: list of package sources to add automatically
+**sources**: list of package sources to add automatically
 
-*packages*: list of packages to install automatically with apt
+**packages**: list of packages to install automatically with apt
 
-*makefile*: list of make targets to execute, default: [lint, test]
+**makefile**: list of make targets to execute, default: [lint, test]
 
 
 ## Finding Tests
