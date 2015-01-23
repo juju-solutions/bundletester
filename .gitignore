@@ -1,3 +1,4 @@
+*~
 dist/
 build/
 .bzr/
@@ -5,3 +6,5 @@ build/
 *.egg-info/
 *.pyc
 *.py.~*
+/.coverage
+/.cover/
