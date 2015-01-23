@@ -182,19 +182,22 @@ def filter_yamls(yamls):
     return result
 
 
-def find_bundle_file(directory):
+def find_bundle_file(directory, bundle):
+    if bundle.path is not None:
+        return bundle.path
+
     pat = os.path.join(directory, "*.yaml")
     yamls = glob.glob(pat)
     yamls = filter_yamls(yamls)
     if not yamls:
         return
     if len(yamls) > 1:
-        raise OSError("Ambigious bundle options: %s" % yamls)
+        raise OSError("Ambigious bundle options: %s. Disambiguate with --bundle" % yamls)
     return yamls[0]
 
 
-def BundleClassifier(directory):
-    bundle = find_bundle_file(directory)
+def BundleClassifier(directory, options):
+    bundle = find_bundle_file(directory, options.bundle)
     if not bundle:
         return None
     result = {'bundle': bundle,
@@ -203,13 +206,14 @@ def BundleClassifier(directory):
     data = lp.infer_bundle(directory) or {}
     result.update(data)
     if 'name' not in data:
-        metadata = yaml.safe_load(open(bundle))
+        with open(bundle) as fh:
+            metadata = yaml.safe_load(fh)
         # XXX: ambiguous
         result['name'] = metadata.keys()[0]
     return models.Bundle(**result)
 
 
-def CharmClassifier(directory):
+def CharmClassifier(directory, options):
     metadata = os.path.join(directory, "metadata.yaml")
     if not os.path.exists(metadata):
         return None
@@ -224,7 +228,7 @@ def CharmClassifier(directory):
     return models.Charm(**data)
 
 
-def TestDirClassifier(directory):
+def TestDirClassifier(directory, options):
     if not os.path.exists(directory):
         return None
     return models.TestDir({
@@ -239,7 +243,7 @@ def SuiteFactory(options, directory="."):
     This classifies the dir based on a series of tests.
     """
     for classifier in [BundleClassifier, CharmClassifier, TestDirClassifier]:
-        model = classifier(directory)
+        model = classifier(directory, options)
         if model:
             model['directory'] = directory
             suite = Suite(model, options)
