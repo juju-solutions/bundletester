@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 import tempfile
-
+import textwrap
 
 from bundletester import (
     reporter,
@@ -24,12 +24,46 @@ def validate():
     subprocess.check_output(['juju', 'version'])
 
 
+class BundleSpec(object):
+    def __init__(self, path, name):
+        self.path = path
+        self.name = name
+
+    @staticmethod
+    def validate_path(path):
+        bp = os.path.abspath(os.path.expanduser(path))
+        if not os.path.exists(bp):
+            raise argparse.ArgumentTypeError("%s not found on filesystem" % bp)
+        return bp
+
+    @classmethod
+    def parse_cli(cls, spec):
+        sp = spec.split(":")
+        name, path = None, None
+
+        if any(sp[0].endswith(y) for y in ('.yml', '.yaml')):
+            candidate = sp.pop(0)
+            path = cls.validate_path(candidate)
+            if len(sp):
+                name = sp[0]
+            return cls(path, name)
+
+        name = sp[0]
+        return cls(path, name)
+
+
 def configure():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-e', '--environment')
     parser.add_argument('-t', '--testdir', default=os.getcwd())
-    parser.add_argument('-b', '-c', '--bundle')
+    parser.add_argument('-b', '-c', '--bundle',
+                        type=BundleSpec.parse_cli,
+                        help=textwrap.dedent("""
+                        Specify a bundle ala
+                        {/path/to/bundle.yaml}:{bundle_name}. Either
+                        path or name is optional
+                        """))
     parser.add_argument('-d', '--deployment')
 
     parser.add_argument('--no-destroy', action="store_true")
