@@ -101,6 +101,9 @@ def main():
     if not options.output:
         options.output = sys.stdout
 
+    if options.bundle.name and not options.deployment:
+        options.deployment = options.bundle.name
+
     try:
         fetcher = fetchers.get_fetcher(options.testdir)
         options.testdir = fetcher.fetch(
