@@ -25,7 +25,7 @@ def validate():
 
 
 class BundleSpec(object):
-    def __init__(self, path, name):
+    def __init__(self, path=None, name=None):
         self.path = path
         self.name = name
 
@@ -59,6 +59,7 @@ def configure():
     parser.add_argument('-t', '--testdir', default=os.getcwd())
     parser.add_argument('-b', '-c', '--bundle',
                         type=BundleSpec.parse_cli,
+                        default=BundleSpec(),
                         help=textwrap.dedent("""
                         Specify a bundle ala
                         {/path/to/bundle.yaml}:{bundle_name}. Either
