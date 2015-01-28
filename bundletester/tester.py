@@ -25,7 +25,7 @@ def validate():
 
 
 class BundleSpec(object):
-    def __init__(self, path=None, name=None, explicit_path=True):
+    def __init__(self, path=None, explicit_path=True):
         self.path = path
         self.explicit_path = explicit_path
 
@@ -41,6 +41,7 @@ class BundleSpec(object):
 
     @classmethod
     def parse_cli(cls, spec):
+        import pdb;pdb.set_trace()
         if any(spec.endswith(y) for y in ('.yml', '.yaml')):
             candidate = spec
             path, explicit = cls.validate_path(candidate)
@@ -106,7 +107,11 @@ def main():
         sys.stderr.write("{}\n".format(e))
         sys.exit(1)
 
-    suite = spec.SuiteFactory(options, options.testdir)
+    try:
+        suite = spec.SuiteFactory(options, options.testdir)
+    except :
+        import pdb;pdb.post_mortem(sys.exc_info()[2])
+
     if not suite:
         sys.stderr.write("No Tests Found\n")
         sys.exit(3)
