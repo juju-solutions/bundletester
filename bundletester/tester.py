@@ -66,8 +66,8 @@ def configure():
                         default=BundleSpec(),
                         help=textwrap.dedent("""
                         Specify a bundle ala
-                        {/path/to/bundle.yaml}:{bundle_name}. Either
-                        path or name is optional
+                        {path/to/bundle.yaml}. Relative paths will be mapped
+                        within the bundle itself for remote bundles
                         """))
     parser.add_argument('-d', '--deployment')
 
@@ -104,9 +104,6 @@ def main():
 
     if not options.output:
         options.output = sys.stdout
-
-    if options.bundle.name and not options.deployment:
-        options.deployment = options.bundle.name
 
     try:
         fetcher = fetchers.get_fetcher(options.testdir)
