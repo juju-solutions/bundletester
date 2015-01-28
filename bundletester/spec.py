@@ -182,10 +182,13 @@ def filter_yamls(yamls):
     return result
 
 
-def find_bundle_file(directory, bundle):
+def find_bundle_file(directory, bundle, filter_yamls=filter_yamls):
     if bundle.path is not None:
-        return bundle.path
-
+        if bundle.explicit_path is True:
+            return bundle.path
+        bp = os.path.join(directory, bundle.path)
+        assert os.path.exists(bp)
+        return bp
     pat = os.path.join(directory, "*.yaml")
     yamls = glob.glob(pat)
     yamls = filter_yamls(yamls)

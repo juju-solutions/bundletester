@@ -25,16 +25,20 @@ def validate():
 
 
 class BundleSpec(object):
-    def __init__(self, path=None, name=None):
+    def __init__(self, path=None, name=None, explicit_path=True):
         self.path = path
         self.name = name
+        self.explicit_path = explicit_path
 
     @staticmethod
     def validate_path(path):
-        bp = os.path.abspath(os.path.expanduser(path))
-        if not os.path.exists(bp):
-            raise argparse.ArgumentTypeError("%s not found on filesystem" % bp)
-        return bp
+        if any((path.startswith(x) for x in ('~', '/', '.'))):
+            bp = os.path.abspath(os.path.expanduser(path))
+            if not os.path.exists(bp):
+                raise argparse.\
+                    ArgumentTypeError("%s not found on filesystem" % bp)
+            return bp, True
+        return path, False
 
     @classmethod
     def parse_cli(cls, spec):
@@ -43,10 +47,10 @@ class BundleSpec(object):
 
         if any(sp[0].endswith(y) for y in ('.yml', '.yaml')):
             candidate = sp.pop(0)
-            path = cls.validate_path(candidate)
+            path, explicit = cls.validate_path(candidate)
             if len(sp):
                 name = sp[0]
-            return cls(path, name)
+            return cls(path, name, explicit)
 
         name = sp[0]
         return cls(path, name)
