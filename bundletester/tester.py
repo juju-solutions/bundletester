@@ -82,10 +82,7 @@ def main():
         sys.stderr.write("{}\n".format(e))
         sys.exit(1)
 
-    try:
-        suite = spec.SuiteFactory(options, options.testdir)
-    except :
-        import pdb;pdb.post_mortem(sys.exc_info()[2])
+    suite = spec.SuiteFactory(options, options.testdir)
 
     if not suite:
         sys.stderr.write("No Tests Found\n")
