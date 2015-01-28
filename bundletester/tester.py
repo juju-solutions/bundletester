@@ -24,44 +24,19 @@ def validate():
     subprocess.check_output(['juju', 'version'])
 
 
-class BundleSpec(object):
-    def __init__(self, path=None, explicit_path=True):
-        self.path = path
-        self.explicit_path = explicit_path
-
-    @staticmethod
-    def validate_path(path):
-        if any((path.startswith(x) for x in ('~', '/', '.'))):
-            bp = os.path.abspath(os.path.expanduser(path))
-            if not os.path.exists(bp):
-                raise argparse.\
-                    ArgumentTypeError("%s not found on filesystem" % bp)
-            return bp, True
-        return path, False
-
-    @classmethod
-    def parse_cli(cls, spec):
-        import pdb;pdb.set_trace()
-        if any(spec.endswith(y) for y in ('.yml', '.yaml')):
-            candidate = spec
-            path, explicit = cls.validate_path(candidate)
-            return cls(path, explicit)
-
-        return cls(spec)
-
-
 def configure():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-e', '--environment')
     parser.add_argument('-t', '--testdir', default=os.getcwd())
     parser.add_argument('-b', '-c', '--bundle',
-                        type=BundleSpec.parse_cli,
-                        default=BundleSpec(),
+                        type=str,
                         help=textwrap.dedent("""
                         Specify a bundle ala
-                        {path/to/bundle.yaml}. Relative paths will be mapped
-                        within the bundle itself for remote bundles
+                        {path/to/bundle.yaml}. Relative paths will be
+                        mapped within the bundle itself for remote
+                        bundles. Explicit local paths to bundles
+                        currently not supported.
                         """))
     parser.add_argument('-d', '--deployment')
 

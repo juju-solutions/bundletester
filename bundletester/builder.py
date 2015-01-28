@@ -43,7 +43,7 @@ class Builder(object):
         result = {
             'returncode': 0
         }
-        bundle = bundle or self.options.bundle.path
+        bundle = bundle or self.options.bundle
         if not bundle:
             return result
         if not os.path.exists(bundle):

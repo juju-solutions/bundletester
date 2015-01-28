@@ -1,45 +1,18 @@
 from functools import partial
 from mock import patch
-import argparse
 import os
 import unittest
 
 
-class TestBundleSpec(unittest.TestCase):
+class TestFindBundleFile(unittest.TestCase):
     here = os.path.abspath(os.path.dirname(__file__))
     lb = os.path.join(here, "watcher/bundle.yaml")
 
-    def makeone(self, spec):
-        from bundletester.tester import BundleSpec
-        return BundleSpec.parse_cli(spec)
-
-    def test_bundle_spec_error(self):
-        with self.assertRaises(argparse.ArgumentTypeError):
-            self.makeone("/tmp/belching-balrog.yaml")
-
-    def test_bundle_spec_error_not_raised_relative_path(self):
-        spec = self.makeone("belching-balrog.yaml")
-        assert spec.path == "belching-balrog.yaml"
-
-    def test_bundle_spec_name_only(self):
-        spec = self.makeone("devel")
-        assert spec.path is "devel"
-
-    def test_bundle_spec_path_only(self):
-        spec = self.makeone(self.lb)
-        assert spec.path.startswith('/')
-        assert spec.path.endswith('watcher/bundle.yaml')
-
-
-class TestFindBundleFile(unittest.TestCase):
-    here = os.path.abspath(os.path.dirname(__file__))
-
-    def makeone(self, path=TestBundleSpec.lb, explicit=True, directory=here):
-        from bundletester.tester import BundleSpec
+    def makeone(self, path=lb, explicit=True, directory=here):
         from bundletester.spec import find_bundle_file
         return partial(find_bundle_file,
                        directory,
-                       BundleSpec(path=path, explicit_path=explicit),
+                       path,
                        filter_yamls=lambda x:x)
 
     def test_find_bundle_file_rel(self):
