@@ -23,20 +23,12 @@ class TestBundleSpec(unittest.TestCase):
 
     def test_bundle_spec_name_only(self):
         spec = self.makeone("devel")
-        assert spec.path is None
-        assert spec.name == 'devel'
+        assert spec.path is "devel"
 
     def test_bundle_spec_path_only(self):
         spec = self.makeone(self.lb)
         assert spec.path.startswith('/')
         assert spec.path.endswith('watcher/bundle.yaml')
-        assert spec.name is None
-
-    def test_bundle_spec_path_and_name(self):
-        spec = self.makeone(self.lb + ":"  + "wat")
-        assert spec.path.startswith('/')
-        assert spec.path.endswith('watcher/bundle.yaml')
-        assert spec.name == 'wat'
 
 
 class TestFindBundleFile(unittest.TestCase):

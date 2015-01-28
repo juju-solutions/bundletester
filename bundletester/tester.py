@@ -27,7 +27,6 @@ def validate():
 class BundleSpec(object):
     def __init__(self, path=None, name=None, explicit_path=True):
         self.path = path
-        self.name = name
         self.explicit_path = explicit_path
 
     @staticmethod
@@ -42,18 +41,12 @@ class BundleSpec(object):
 
     @classmethod
     def parse_cli(cls, spec):
-        sp = spec.split(":")
-        name, path = None, None
-
-        if any(sp[0].endswith(y) for y in ('.yml', '.yaml')):
-            candidate = sp.pop(0)
+        if any(spec.endswith(y) for y in ('.yml', '.yaml')):
+            candidate = spec
             path, explicit = cls.validate_path(candidate)
-            if len(sp):
-                name = sp[0]
-            return cls(path, name, explicit)
+            return cls(path, explicit)
 
-        name = sp[0]
-        return cls(path, name)
+        return cls(spec)
 
 
 def configure():
