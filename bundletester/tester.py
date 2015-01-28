@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 import tempfile
-
+import textwrap
 
 from bundletester import (
     reporter,
@@ -29,7 +29,15 @@ def configure():
 
     parser.add_argument('-e', '--environment')
     parser.add_argument('-t', '--testdir', default=os.getcwd())
-    parser.add_argument('-b', '-c', '--bundle')
+    parser.add_argument('-b', '-c', '--bundle',
+                        type=str,
+                        help=textwrap.dedent("""
+                        Specify a bundle ala
+                        {path/to/bundle.yaml}. Relative paths will be
+                        mapped within the bundle itself for remote
+                        bundles. Explicit local paths to bundles
+                        currently not supported.
+                        """))
     parser.add_argument('-d', '--deployment')
 
     parser.add_argument('--no-destroy', action="store_true")
@@ -75,6 +83,7 @@ def main():
         sys.exit(1)
 
     suite = spec.SuiteFactory(options, options.testdir)
+
     if not suite:
         sys.stderr.write("No Tests Found\n")
         sys.exit(3)
