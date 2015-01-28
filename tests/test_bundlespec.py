@@ -38,5 +38,6 @@ class TestFindBundleFile(unittest.TestCase):
             with self.assertRaises(OSError):
                 fbf()
 
-    def test_find_bundle_file_explicit(self):
-        assert self.makeone(path="/wat", explicit=True)() == '/wat'
+    def test_find_bundle_file_explicit_raise(self):
+        with self.assertRaises(OSError):
+            assert self.makeone(path="/wat")()
