@@ -67,7 +67,7 @@ class Runner(object):
         p.communicate()
         retcode = p.returncode
         log.debug("Exit Code: %s" % retcode)
-        return retcode, '\n'.join(output)
+        return retcode, ''.join(output)
 
     def run(self, spec, phase=None):
         """Run a phase of spec.
