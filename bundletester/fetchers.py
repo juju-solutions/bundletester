@@ -83,6 +83,7 @@ class BzrMergeProposalFetcher(BzrFetcher):
         source = 'lp:' + merge_data['source_branch_link'][len(api_base):]
         bzr('branch --use-existing-dir {} {}'.format(target, dir_))
         bzr('merge {}'.format(source), cwd=dir_)
+        bzr('commit --unchanged -m "Merge commit"', cwd=dir_)
         return dir_
 
 
