@@ -60,11 +60,18 @@ class Builder(object):
         logging.debug("deploy %s", ' '.join(cmd))
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-        ec = p.wait()
-        output = p.stdout.read()
+
+        # Print all output as it comes in to debug
+        output = []
+        lines = iter(p.stdout.readline, "")
+        for line in lines:
+            output.append(line)
+            logging.debug(str(line.rstrip()))
+
+        p.communicate()
         return {
-            'returncode': ec,
-            'output': output,
+            'returncode': p.returncode,
+            'output': ''.join(output),
             'executable': cmd
         }
 

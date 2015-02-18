@@ -131,6 +131,8 @@ class Runner(object):
     def __call__(self):
         self.build()
         bootstrapped = self.builder.bootstrap()
+        if isinstance(self.suite.model, models.Bundle):
+            self._deploy(self.suite.model['bundle'])
         for element in self.suite:
             if isinstance(element, Suite):
                 for result in self._run_suite(element):
@@ -147,8 +149,8 @@ class Runner(object):
         if bootstrapped:
             self.builder.destroy()
 
-    def _deploy(self, spec):
-        deployed = self.builder.deploy(spec)
+    def _deploy(self, bundle):
+        deployed = self.builder.deploy(bundle)
         if not deployed or deployed and deployed.get('returncode') != 0:
             exc = DeployError()
             exc.result = result = {}
@@ -166,8 +168,6 @@ class Runner(object):
         result = {}
         cwd = os.getcwd()
         try:
-            if isinstance(spec.suite.model, models.Bundle):
-                self._deploy(spec.bundle)
             if spec.reset:
                 self.builder.reset()
             basedir = spec.get('dirname')
