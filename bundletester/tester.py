@@ -63,6 +63,9 @@ def configure():
 
     if not options.environment:
         options.environment = current_environment()
+    # Set the environment variable BUNDLE if the bundle argument was provided.
+    if options.bundle:
+        os.environ['BUNDLE'] = options.bundle
     logging.basicConfig(level=options.log_level)
     return options
 
