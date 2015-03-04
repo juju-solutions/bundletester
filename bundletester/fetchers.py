@@ -24,6 +24,7 @@ def get(*args, **kw):
 
 class Fetcher(object):
     def __init__(self, url, **kw):
+        self.revision = ''
         self.url = url
         for k, v in kw.items():
             setattr(self, k, v)

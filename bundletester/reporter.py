@@ -157,7 +157,16 @@ class SpecReporter(Reporter):
 
 class JSONReporter(Reporter):
     def summary(self):
-        json.dump(self.messages, self.fp, indent=2)
+        opts = self.options
+        d = {
+            'tests': self.messages,
+            'revision': opts.fetcher.get_revision(opts.testdir).strip(),
+            'testdir': opts.testdir,
+        }
+        if opts.bundle:
+            d['bundle'] = self.suite.model['bundle']
+
+        json.dump(d, self.fp, indent=2)
         self.write('\n')
         self.fp.flush()
 

@@ -79,6 +79,7 @@ def main():
 
     try:
         fetcher = fetchers.get_fetcher(options.testdir)
+        options.fetcher = fetcher
         options.testdir = fetcher.fetch(
             tempfile.mkdtemp(prefix='bundletester-'))
     except fetchers.FetchError as e:
