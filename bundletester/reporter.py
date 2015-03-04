@@ -160,7 +160,7 @@ class JSONReporter(Reporter):
         opts = self.options
         d = {
             'tests': self.messages,
-            'revision': opts.fetcher.get_revision(opts.testdir).strip(),
+            'revision': str(opts.fetcher.get_revision(opts.testdir)).strip(),
             'testdir': opts.testdir,
         }
         if opts.bundle:
