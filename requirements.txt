@@ -1,4 +1,4 @@
-bzr==2.6.0
+bzr>=2.6.0
 blessings
 charm-tools
 charmworldlib
