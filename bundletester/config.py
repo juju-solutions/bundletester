@@ -28,6 +28,10 @@ class Parser(dict):
             data = yaml.safe_load(open(path, 'r').read())
             self.merge(data)
 
+            # Replace the default makefile targets
+            if 'makefile' in data:
+                self.update(makefile=data['makefile'])
+
     def __getattr__(self, key):
         return dict.get(self, key)
 
