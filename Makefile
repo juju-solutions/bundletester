@@ -1,3 +1,4 @@
+PYTHON := /usr/bin/env python
 PROJECT=bundletester
 
 all: lint test
@@ -28,3 +29,5 @@ lint:
 .venv:
 	./bin/test_setup
 
+release:
+	$(PYTHON) setup.py register sdist upload
