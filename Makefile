@@ -11,7 +11,7 @@ clean:
 
 test: .venv
 	@echo Starting tests...
-	@./bin/nosetests 
+	@./bin/nosetests
 
 coverage: .venv
 	@echo Starting tests...
@@ -21,7 +21,7 @@ coverage: .venv
 
 ftest:
 	@echo Starting fast tests...
-	@./bin/nosetests --attr '!slow' --nologcapture 
+	@./bin/nosetests --attr '!slow' --nologcapture
 
 lint:
 	@flake8 $(PROJECT) $(TESTS) && echo OK
@@ -31,3 +31,9 @@ lint:
 
 release:
 	$(PYTHON) setup.py register sdist upload
+	@if [ -n "${CHARMBOX_TOKEN}" ]; then \
+	    echo 'Rebuilding charmbox' ; \
+	    curl --data "build=true" -X POST https://registry.hub.docker.com/u/johnsca/charmbox/trigger/$(CHARMBOX_TOKEN)/ ; \
+	else \
+	    echo 'Not rebuilding charmbox due to missing CHARMBOX_TOKEN' ; \
+	fi
