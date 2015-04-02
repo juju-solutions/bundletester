@@ -27,7 +27,7 @@ class TestSpec(unittest.TestCase):
         self.assertEqual(test.name, os.path.basename(locate('test01')))
         self.assertEqual(test.executable, [os.path.abspath(locate('test01'))])
         # Verify we got a default config file representation
-        self.assertEqual(test.virtualenv, True)
+        self.assertEqual(test.virtualenv, False)
 
     def test_spec_config(self):
         test = spec.Spec(locate('test02'))
