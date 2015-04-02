@@ -1,4 +1,5 @@
 import json
+import mock
 import unittest
 from StringIO import StringIO
 
@@ -24,7 +25,11 @@ class TestReporter(unittest.TestCase):
 
     def test_json_reporter(self):
         buf = StringIO()
-        r = reporter.JSONReporter(fp=buf)
+        opts = mock.Mock()
+        opts.fetcher.get_revision.return_value = '1'
+        opts.testdir = '/tmp/test'
+        opts.bundle = False
+        r = reporter.JSONReporter(fp=buf, options=opts)
         sample1 = self.make_sample()
         sample2 = self.make_sample(1)
         r.emit(sample1)
@@ -32,5 +37,7 @@ class TestReporter(unittest.TestCase):
         r.summary()
         output = buf.getvalue()
         result = json.loads(output)
-        self.assertEqual(result[0]['returncode'], 0)
-        self.assertEqual(result[1]['returncode'], 1)
+        self.assertEqual(result['revision'], '1')
+        self.assertEqual(result['testdir'], '/tmp/test')
+        self.assertEqual(result['tests'][0]['returncode'], 0)
+        self.assertEqual(result['tests'][1]['returncode'], 1)
