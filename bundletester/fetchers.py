@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 
 import requests
+import yaml
 
 from charmworldlib.bundle import Bundle
 
@@ -20,6 +21,24 @@ def get(*args, **kw):
         kw['timeout'] = REQUEST_TIMEOUT_SECS
 
     return requests.get(*args, **kw)
+
+
+def rename(dir_):
+    """If ``dir_`` is a charm directory, rename it to match the
+    charm name, otherwise do nothing.
+
+    :param dir_: directory path
+    :return: the new directory name (possibly unchanged).
+
+    """
+    dir_ = dir_.rstrip(os.sep)
+    metadata = os.path.join(dir_, "metadata.yaml")
+    if not os.path.exists(metadata):
+        return dir_
+    metadata = yaml.safe_load(open(metadata))
+    new_dir = os.path.join(os.path.dirname(dir_), metadata['name'])
+    os.rename(dir_, new_dir)
+    return new_dir
 
 
 class Fetcher(object):
@@ -66,7 +85,7 @@ class BzrFetcher(Fetcher):
         if self.revision:
             cmd = '{} -r {}'.format(cmd, self.revision)
         bzr(cmd)
-        return dir_
+        return rename(dir_)
 
 
 class BzrMergeProposalFetcher(BzrFetcher):
@@ -85,7 +104,7 @@ class BzrMergeProposalFetcher(BzrFetcher):
         bzr('branch --use-existing-dir {} {}'.format(target, dir_))
         bzr('merge {}'.format(source), cwd=dir_)
         bzr('commit --unchanged -m "Merge commit"', cwd=dir_)
-        return dir_
+        return rename(dir_)
 
 
 class GithubFetcher(Fetcher):
@@ -100,7 +119,7 @@ class GithubFetcher(Fetcher):
         git('clone {} {}'.format(url, dir_))
         if self.revision:
             git('checkout {}'.format(self.revision), cwd=dir_)
-        return dir_
+        return rename(dir_)
 
 
 class BitbucketFetcher(Fetcher):
@@ -120,14 +139,14 @@ class BitbucketFetcher(Fetcher):
         git('clone {} {}'.format(url, dir_))
         if self.revision:
             git('checkout {}'.format(self.revision), cwd=dir_)
-        return dir_
+        return rename(dir_)
 
     def _fetch_hg(self, url, dir_):
         cmd = 'clone {} {}'.format(url, dir_)
         if self.revision:
             cmd = '{} -u {}'.format(cmd, self.revision)
         hg(cmd)
-        return dir_
+        return rename(dir_)
 
 
 class LocalFetcher(Fetcher):
@@ -140,7 +159,7 @@ class LocalFetcher(Fetcher):
         return {}
 
     def fetch(self, dir_):
-        dst = os.path.join(dir_, os.path.basename(self.path.rstrip('/')))
+        dst = os.path.join(dir_, os.path.basename(self.path.rstrip(os.sep)))
         shutil.copytree(self.path, dst, symlinks=True)
         return dst
 
@@ -186,7 +205,7 @@ class CharmstoreDownloader(Fetcher):
         url = self.STORE_URL + url
         archive = self.download_file(url, dir_)
         charm_dir = self.extract_archive(archive, dir_)
-        return charm_dir
+        return rename(charm_dir)
 
     def extract_archive(self, archive, dir_):
         tempdir = tempfile.mkdtemp(dir=dir_)
