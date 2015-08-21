@@ -1,3 +1,6 @@
+import os
+import shutil
+import tempfile
 import unittest
 
 from bundletester.fetchers import (
@@ -8,7 +11,33 @@ from bundletester.fetchers import (
     LocalFetcher,
     CharmstoreDownloader,
     BundleDownloader,
+    rename
 )
+
+
+class RenameTest(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.mkdtemp()
+
+    def tearDown(self):
+        if os.path.exists(self.directory):
+            shutil.rmtree(self.directory)
+
+    def test_rename_no_meta(self):
+        self.assertEqual(rename(self.directory), self.directory)
+
+    def test_rename_no_name(self):
+        path = os.path.join(self.directory, "metadata.yaml")
+        with open(path, "w") as fp:
+            fp.write("another: key\n")
+        self.assertEqual(rename(self.directory), self.directory)
+
+    def test_rename_with_name(self):
+        d = tempfile.mkdtemp(dir=self.directory)
+        path = os.path.join(d, "metadata.yaml")
+        with open(path, "w") as fp:
+            fp.write("name: foo\n")
+        self.assertEqual(os.path.basename(rename(d)), "foo")
 
 
 class BzrFetcherTest(unittest.TestCase):
