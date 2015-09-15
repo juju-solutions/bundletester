@@ -171,12 +171,17 @@ def filter_yamls(yamls):
         data = yaml.safe_load(open(yamlfn))
         if not isinstance(data, dict):
             continue
+        # v4 bundle format
+        if 'services' in data and 'services' not in data['services']:
+            result.append(yamlfn)
+            continue
         for possible in data.values():
             if isinstance(possible, dict) and 'services' in possible:
                 keys = sorted(possible['services'].keys())
                 if keys == ['default', 'description', 'type']:
                     # looks like a charm, not a bundle
                     continue
+                # v3 bundle format
                 result.append(yamlfn)
                 break
     return result
@@ -194,7 +199,8 @@ def find_bundle_file(directory, bundle, filter_yamls=filter_yamls):
     if not yamls:
         return
     if len(yamls) > 1:
-        raise OSError("Ambigious bundle options: %s. Disambiguate with --bundle" % yamls)
+        raise OSError(
+            "Ambigious bundle options: %s. Disambiguate with --bundle" % yamls)
     return yamls[0]
 
 
