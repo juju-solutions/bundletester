@@ -43,7 +43,7 @@ def configure():
     parser.add_argument('--no-destroy', action="store_true")
 
     parser.add_argument('-l', '--log-level', dest="log_level",
-                        default=logging.INFO)
+                        default='INFO')
     parser.add_argument('-o', '--output', dest="output",
                         type=argparse.FileType('w'))
     parser.add_argument('-n', '--dry-run', action="store_true",
