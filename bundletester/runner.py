@@ -46,7 +46,7 @@ class Runner(object):
         return self._builder
 
     def _run(self, executable):
-        log.debug("call %s (cwd: %s)" % (executable, self.option.testdir))
+        log.debug("call %s (cwd: %s)" % (executable, self.options.testdir))
         if self.options.dryrun:
             return 0, ""
 
