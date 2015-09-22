@@ -117,21 +117,24 @@ Explanation of keys:
 
 **reset**: Use juju-deployer to reset env between test, default: true
 
-**setup**: optional name of script in test dir to run before each test
+**virtualenv**: create and activate a virtualenv in which all tests are run, default: true
 
-**teardown**: optional name of script to run after each test
+**tests**: glob of executable files in testdir to treat as tests, default: "\*"
 
-**tests**: glob of files in testdir to treat as tests, only executable
-       files will be used.
-
-**virtualenv**: create and activate a virutalenv for the running of all tests
-defaults to true
+**excludes**: list of charm names for which tests should be skipped
 
 **sources**: list of package sources to add automatically
 
 **packages**: list of packages to install automatically with apt
 
 **makefile**: list of make targets to execute, default: [lint, test]
+
+**setup**: optional name of script in test dir to run before each test
+
+**teardown**: optional name of script to run after each test
+
+
+
 
 
 ## Finding Tests
