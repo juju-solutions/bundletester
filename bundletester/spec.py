@@ -102,7 +102,7 @@ class Suite(list):
             tests = tests.intersection(set(filterset))
         for test in sorted(tests):
             if os.path.isfile(test) and os.access(test, os.X_OK | os.R_OK):
-                self.spec(test, dirname=self.testdir, suite=self)
+                self.spec(test, dirname=self.model['directory'], suite=self)
 
     def find_suite(self):
         """Find and prepend charms tests to our suite of tests.
