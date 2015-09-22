@@ -45,8 +45,8 @@ class Runner(object):
             self._builder = builder.Builder(self.suite.config, self.options)
         return self._builder
 
-    def _run(self, executable):
-        log.debug("call %s (cwd: %s)" % (executable, self.options.testdir))
+    def _run(self, executable, cwd):
+        log.debug("call %s (cwd: %s)" % (executable, cwd))
         if self.options.dryrun:
             return 0, ""
 
@@ -54,7 +54,7 @@ class Runner(object):
             executable,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            cwd=self.options.testdir,
+            cwd=cwd,
         )
 
         # Print all output as it comes in to debug
@@ -91,7 +91,7 @@ class Runner(object):
             return result
         start = datetime.datetime.utcnow()
         for candidate in candidates:
-            ec, output = self._run(candidate)
+            ec, output = self._run(candidate, spec.dirname)
             result['returncode'] = ec
             result['output'] = output
             result['executable'] = spec.executable

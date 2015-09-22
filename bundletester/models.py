@@ -17,7 +17,7 @@ class Charm(FSEntity):
         # so we can change the charm dir name to match the charm name
         # (some tests rely on these matching).
         tmp_dir = tempfile.mkdtemp()
-        charm_dir = os.path.join(tmp_dir, dcharm.name)
+        charm_dir = os.path.join(tmp_dir, dcharm.name.split('/')[-1])
         shutil.copytree(dcharm.path, charm_dir, symlinks=True)
         atexit.register(shutil.rmtree, tmp_dir)
 
