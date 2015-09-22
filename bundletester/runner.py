@@ -46,7 +46,7 @@ class Runner(object):
         return self._builder
 
     def _run(self, executable):
-        log.debug("call %s" % executable)
+        log.debug("call %s (cwd: %s)" % (executable, self.option.testdir))
         if self.options.dryrun:
             return 0, ""
 
@@ -80,25 +80,25 @@ class Runner(object):
         }
 
         if phase == "setup":
-            canidates = relative_to(spec.setup, spec.suite.testdir)
+            candidates = relative_to(spec.setup, spec.suite.testdir)
         elif phase == "teardown":
-            canidates = relative_to(reversed(spec.teardown),
-                                    spec.suite.testdir)
+            candidates = relative_to(reversed(spec.teardown),
+                                     spec.suite.testdir)
         else:
-            canidates = [spec.executable]
+            candidates = [spec.executable]
 
-        if not canidates:
+        if not candidates:
             return result
         start = datetime.datetime.utcnow()
-        for canidate in canidates:
-            ec, output = self._run(canidate)
+        for candidate in candidates:
+            ec, output = self._run(candidate)
             result['returncode'] = ec
             result['output'] = output
             result['executable'] = spec.executable
             if ec != 0:
-                if isinstance(canidate, list):
-                    canidate = " ".join(canidate)
-                result['exit'] = canidate
+                if isinstance(candidate, list):
+                    candidate = " ".join(candidate)
+                result['exit'] = candidate
                 break
 
         if not phase:
