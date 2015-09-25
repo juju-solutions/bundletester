@@ -50,10 +50,10 @@ The `-t` option accepts a variety of URL types:
 
     -t cs:wordpress
     -t cs:precise/wordpress
-    -t bundle:mediawiki/single
-    -t bundle:mediawiki/6/single
-    -t bundle:~charmers/mediawiki/single
-    -t bundle:~charmers/mediawiki/6/single
+    -t bundle:mediawiki-single
+    -t bundle:mediawiki-single-8
+    -t bundle:~charmers/mediawiki-single
+    -t bundle:~charmers/mediawiki-single-8
 
 ### Launchpad
 

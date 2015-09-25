@@ -3,6 +3,11 @@ PROJECT=bundletester
 
 all: lint test
 
+.PHONY: deps
+deps: .venv
+	@echo Updating dependency wheels...
+	@.venv/bin/pip wheel -w deps -r requirements.txt
+
 clean:
 	rm -rf MANIFEST dist/* bundletester.egg-inf .cover
 	find . -name '*.pyc' -delete

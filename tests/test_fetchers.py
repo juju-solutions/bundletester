@@ -11,7 +11,8 @@ from bundletester.fetchers import (
     LocalFetcher,
     CharmstoreDownloader,
     BundleDownloader,
-    rename
+    rename,
+    normalize_bundle_name,
 )
 
 
@@ -227,3 +228,31 @@ class BundleDownloaderTest(unittest.TestCase):
 
         for test in bad_tests:
             self.assertEqual(test, {})
+
+    def test_normalize_bundle_name(self):
+        f = normalize_bundle_name
+
+        inputs = [
+            '~charmers/mediawiki/6/single',
+            '~charmers/mediawiki/single',
+            'mediawiki/single',
+            'mediawiki/6/single',
+            'mediawiki-single',
+            'mediawiki-single-6',
+            '~charmers/mediawiki-single-6',
+            '~charmers/mediawiki-single',
+        ]
+
+        outputs = [
+            '~charmers/mediawiki-single-6',
+            '~charmers/mediawiki-single',
+            'mediawiki-single',
+            'mediawiki-single-6',
+            'mediawiki-single',
+            'mediawiki-single-6',
+            '~charmers/mediawiki-single-6',
+            '~charmers/mediawiki-single',
+        ]
+
+        for i, bundle_name in enumerate(inputs):
+            self.assertEqual(f(bundle_name), outputs[i])
