@@ -16,6 +16,7 @@ SETUP = {
     'url': "https://github.com/juju-solutions/bundletester",
     'license': "Affero GNU Public License v3",
     'long_description': open('README.md').read(),
+    'description': 'A juju charm and bundle test runner',
     'entry_points': {
         'console_scripts': [
             'bundletester = bundletester.tester:main',
