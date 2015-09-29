@@ -87,7 +87,11 @@ class Builder(object):
             start, timeout = time.time(), 60
             while True:
                 try:
-                    self.environment.reset(terminate_machines=True)
+                    self.environment.reset(
+                        terminate_machines=True,
+                        terminate_delay=60,
+                        force_terminate=True
+                    )
                     break
                 except Exception as e:
                     logging.exception(e)
@@ -107,7 +111,7 @@ class Builder(object):
 
             # wait for all services to be removed
             logging.debug("Waiting for services to be removed...")
-            start, timeout = time.time(), 600
+            start, timeout = time.time(), 60
             while True:
                 status = self.environment.status()
                 if not status.get('services', {}):

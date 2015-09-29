@@ -2,7 +2,7 @@ bzr>=2.6.0
 blessings
 charm-tools
 coverage
-juju-deployer>=0.5.2
+juju-deployer>=0.6.0
 lazr.authentication
 mock
 nose
