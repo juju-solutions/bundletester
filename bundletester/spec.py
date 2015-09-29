@@ -67,7 +67,15 @@ class Suite(list):
     def config(self):
         if not self._config:
             testcfg = None
-            if self.testdir:
+            if self.options.tests_yaml:
+                file_path = os.path.abspath(
+                    os.path.expanduser(self.options.tests_yaml))
+                if os.path.exists(file_path):
+                    testcfg = file_path
+                else:
+                    raise OSError(
+                        'Invalid -y argument. File not found: %s' % file_path)
+            elif self.testdir:
                 testcfg = os.path.join(self.testdir, "tests.yaml")
                 if not os.path.exists(testcfg):
                     testcfg = None

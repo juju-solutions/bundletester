@@ -88,9 +88,14 @@ The `-t` option accepts a variety of URL types:
 
 # Test Directory
 
-The driver file, 'tests/tests.yaml' is used (by default) to control the overall
+The driver file, `tests/tests.yaml` is used (by default) to control the overall
 flow of how tests work. All values in this file and indeed the file itself are
 optional. When not provided defaults will be used.
+
+You can override the `tests/tests.yaml` file in a charm or bundle by
+using the `-y` argument to bundletester, e.g.:
+
+    bundletester -t cs:meteor -y /path/to/custom/tests.yaml
 
 ## tests.yaml
 

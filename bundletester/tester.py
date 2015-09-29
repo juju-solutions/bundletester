@@ -57,6 +57,10 @@ def configure():
     parser.add_argument('-s', '--skip-implicit', action="store_true",
                         help="Don't include automatically generated tests")
     parser.add_argument('-x', '--exclude', dest="exclude", action="append")
+    parser.add_argument('-y', '--tests-yaml', dest="tests_yaml",
+                        help="Path to a tests.yaml file which will "
+                        "override the one in the charm or bundle "
+                        "being tested.")
     parser.add_argument('--test-pattern', dest="test_pattern")
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
