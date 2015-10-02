@@ -122,7 +122,7 @@ Explanation of keys:
 
 **reset**: Use juju-deployer to reset env between test, default: true
 
-**virtualenv**: create and activate a virtualenv in which all tests are run, default: true
+**virtualenv**: create and activate a virtualenv in which all tests are run, default: false
 
 **tests**: glob of executable files in testdir to treat as tests, default: "\*"
 
