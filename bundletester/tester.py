@@ -74,8 +74,8 @@ def configure():
     return options
 
 
-def main():
-    options = configure()
+def main(options=None):
+    options = options or configure()
     validate()
 
     if not options.output:
