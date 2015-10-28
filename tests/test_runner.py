@@ -30,6 +30,7 @@ class TestRunner(unittest.TestCase):
         options.dryrun = True
         options.environment = 'local'
         options.failfast = True
+        options.tests_yaml=None
         model = models.TestDir({'name': 'testdir',
                                 'directory': TEST_FILES,
                                 'testdir': TEST_FILES})
