@@ -94,8 +94,8 @@ class Reporter(object):
     def exit(self):
         for m in self.messages:
             if m['returncode'] != 0:
-                sys.exit(1)
-        sys.exit(0)
+                return 1
+        return 0
 
 
 class DotReporter(Reporter):

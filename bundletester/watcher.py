@@ -69,6 +69,7 @@ def main():
     if not options.revisions:
         options.revisions = os.path.join(curdir, 'revisions.json')
 
+    tmpdir = None
     if options.bundle_only is False:
         tmpdir = tempfile.mkdtemp()
         os.chdir(tmpdir)
@@ -80,7 +81,7 @@ def main():
         raise ValueError("%s missing YAML files" % options.bundle)
 
     if options.bundle_only:
-        sys.exit(0)
+        return 0
 
     c = ConfigStack(configs)
     if not options.deployment and len(c.keys()) == 1:
@@ -99,16 +100,17 @@ def main():
         current[charm.name] = get_bzr_revno(charm.path)
     existing = load_revisions(options.revisions)
 
-    shutil.rmtree(tmpdir)
+    if tmpdir:
+        shutil.rmtree(tmpdir)
     if current != existing:
         logging.debug("Recored revisions: %s" % options.revisions)
         record_revisions(options.revisions, current)
         logging.info("BUILD: exit 0")
-        sys.exit(0)
+        return 0
 
     logging.info("SKIP: exit 1")
-    sys.exit(1)
+    return 1
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

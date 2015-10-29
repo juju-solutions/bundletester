@@ -88,13 +88,13 @@ def main(options=None):
             tempfile.mkdtemp(prefix='bundletester-'))
     except fetchers.FetchError as e:
         sys.stderr.write("{}\n".format(e))
-        sys.exit(1)
+        return 1
 
     suite = spec.SuiteFactory(options, options.testdir)
 
     if not suite:
         sys.stderr.write("No Tests Found\n")
-        sys.exit(3)
+        return 3
 
     report = reporter.get_reporter(options.reporter, options.output, options)
     report.set_suite(suite)
@@ -104,8 +104,8 @@ def main(options=None):
         with utils.juju_env(options.environment):
             [report.emit(result) for result in run()]
     report.summary()
-    report.exit()
+    return report.exit()
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
