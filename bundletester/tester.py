@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from collections import namedtuple
 import subprocess
 import sys
 import tempfile
@@ -104,8 +105,16 @@ def main(options=None):
         with utils.juju_env(options.environment):
             [report.emit(result) for result in run()]
     report.summary()
-    return report.exit()
+    return_code = report.exit()
+    status = namedtuple('status', ['bundle_yaml', 'return_code'])
+    status.return_code = return_code
+    status.bundle_yaml = None
+    if suite and suite.model.get('bundle'):
+        with open(suite.model["bundle"]) as fp:
+            status.bundle_yaml = fp.read()
+    return status
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    status = main()
+    sys.exit(status.return_code)
