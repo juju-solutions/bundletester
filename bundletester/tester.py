@@ -75,6 +75,20 @@ def configure():
     return options
 
 
+def get_return_data(return_code, suite):
+    status = namedtuple('status', ['bundle_yaml', 'charm' 'return_code'])
+    status.return_code = return_code
+    status.bundle_yaml = None
+    status.charm = None
+    if suite:
+        if suite.model.get('bundle'):
+            with open(suite.model["bundle"]) as fp:
+                status.bundle_yaml = fp.read()
+        elif suite.model.get('metadata'):
+            status.charm = suite.model.get('metadata')
+    return status
+
+
 def main(options=None):
     options = options or configure()
     validate()
@@ -106,12 +120,7 @@ def main(options=None):
             [report.emit(result) for result in run()]
     report.summary()
     return_code = report.exit()
-    status = namedtuple('status', ['bundle_yaml', 'return_code'])
-    status.return_code = return_code
-    status.bundle_yaml = None
-    if suite and suite.model.get('bundle'):
-        with open(suite.model["bundle"]) as fp:
-            status.bundle_yaml = fp.read()
+    status = get_return_data(return_code, suite)
     return status
 
 
