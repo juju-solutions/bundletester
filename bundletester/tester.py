@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from collections import namedtuple
 import subprocess
 import sys
 import tempfile
@@ -74,6 +75,20 @@ def configure():
     return options
 
 
+def get_return_data(return_code, suite):
+    status = namedtuple('status', ['bundle_yaml', 'charm' 'return_code'])
+    status.return_code = return_code
+    status.bundle_yaml = None
+    status.charm = None
+    if suite:
+        if suite.model.get('bundle'):
+            with open(suite.model["bundle"]) as fp:
+                status.bundle_yaml = fp.read()
+        elif suite.model.get('metadata'):
+            status.charm = suite.model.get('metadata')
+    return status
+
+
 def main(options=None):
     options = options or configure()
     validate()
@@ -104,8 +119,11 @@ def main(options=None):
         with utils.juju_env(options.environment):
             [report.emit(result) for result in run()]
     report.summary()
-    return report.exit()
+    return_code = report.exit()
+    status = get_return_data(return_code, suite)
+    return status
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    status = main()
+    sys.exit(status.return_code)
