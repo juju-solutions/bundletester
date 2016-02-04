@@ -103,13 +103,13 @@ def main(options=None):
             tempfile.mkdtemp(prefix='bundletester-'))
     except fetchers.FetchError as e:
         sys.stderr.write("{}\n".format(e))
-        return 1
+        return get_return_data(1, None)
 
     suite = spec.SuiteFactory(options, options.testdir)
 
     if not suite:
         sys.stderr.write("No Tests Found\n")
-        return 3
+        return get_return_data(3, None)
 
     report = reporter.get_reporter(options.reporter, options.output, options)
     report.set_suite(suite)
@@ -124,6 +124,10 @@ def main(options=None):
     return status
 
 
-if __name__ == '__main__':
+def entrypoint():
     status = main()
     sys.exit(status.return_code)
+
+
+if __name__ == '__main__':
+    entrypoint()

@@ -19,7 +19,7 @@ SETUP = {
     'description': 'A juju charm and bundle test runner',
     'entry_points': {
         'console_scripts': [
-            'bundletester = bundletester.tester:main',
+            'bundletester = bundletester.tester:entrypoint',
             'bundlewatcher = bundletester.watcher:main'
         ]
     },
