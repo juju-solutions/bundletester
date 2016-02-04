@@ -208,51 +208,37 @@ class LocalFetcher(Fetcher):
         return dst
 
 
-class StoreCharm(object):
-    STORE_URL = 'https://store.juju.ubuntu.com/charm-info'
-
-    def __init__(self, name):
-        self.name = name
-        self.data = self.fetch()
-
-    def __getattr__(self, key):
-        return self.data[key]
-
-    def fetch(self):
-        params = {
-            'stats': 0,
-            'charms': self.name,
-        }
-        r = get(self.STORE_URL, params=params).json()
-        charm_data = r[self.name]
-        if 'errors' in charm_data:
-            raise FetchError(
-                'Error retrieving "{}" from charm store: {}'.format(
-                    self.name, '; '.join(charm_data['errors']))
-            )
-        return charm_data
-
-
 class CharmstoreDownloader(Fetcher):
     MATCH = re.compile(r"""
-    ^cs:(?P<charm>.*)$
+    ^cs:(?P<entity>.*)$
     """, re.VERBOSE)
 
-    STORE_URL = 'https://store.juju.ubuntu.com/charm/'
+    STORE_URL = 'https://api.jujucharms.com/charmstore/v4/{}'
+    ARCHIVE_URL = STORE_URL + '/archive'
+    REVISION_URL = STORE_URL + '/meta/id-revision'
 
     def __init__(self, *args, **kw):
         super(CharmstoreDownloader, self).__init__(*args, **kw)
-        self.charm = StoreCharm(self.charm)
 
     def fetch(self, dir_):
-        url = self.charm.data['canonical-url'][len('cs:'):]
-        url = self.STORE_URL + url
+        url = self.ARCHIVE_URL.format(self.entity)
         archive = download_file(url, dir_)
-        charm_dir = extract_archive(archive, dir_)
-        return rename(charm_dir)
+        entity_dir = extract_archive(archive, dir_)
+        return rename(entity_dir)
 
     def get_revision(self, dir_):
-        return self.charm.revision
+        url = self.REVISION_URL.format(self.entity)
+        return get(url).json()['Revision']
+
+
+class BundleDownloader(CharmstoreDownloader):
+    MATCH = re.compile(r"""
+    ^bundle:(?P<entity>.*)$
+    """, re.VERBOSE)
+
+    def __init__(self, *args, **kw):
+        super(BundleDownloader, self).__init__(*args, **kw)
+        self.entity = normalize_bundle_name(self.entity)
 
 
 def normalize_bundle_name(bundle_name):
@@ -277,30 +263,6 @@ def normalize_bundle_name(bundle_name):
     if owner:
         bundle = '/'.join((owner, bundle))
     return bundle
-
-
-class BundleDownloader(Fetcher):
-    MATCH = re.compile(r"""
-    ^bundle:(?P<bundle>.*)$
-    """, re.VERBOSE)
-
-    STORE_URL = 'https://api.jujucharms.com/charmstore/v4/{}'
-    ARCHIVE_URL = STORE_URL + '/archive'
-    REVISION_URL = STORE_URL + '/meta/id-revision'
-
-    def __init__(self, *args, **kw):
-        super(BundleDownloader, self).__init__(*args, **kw)
-        self.bundle = normalize_bundle_name(self.bundle)
-
-    def fetch(self, dir_):
-        url = self.ARCHIVE_URL.format(self.bundle)
-        archive = download_file(url, dir_)
-        bundle_dir = extract_archive(archive, dir_)
-        return bundle_dir
-
-    def get_revision(self, dir_):
-        url = self.REVISION_URL.format(self.bundle)
-        return get(url).json()['Revision']
 
 
 def bzr(cmd, **kw):

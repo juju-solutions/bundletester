@@ -200,7 +200,7 @@ class CharmstoreDownloaderTest(unittest.TestCase):
         ]
 
         for test in good_tests:
-            self.assertEqual(test['charm'], 'precise/meteor')
+            self.assertEqual(test['entity'], 'precise/meteor')
 
         for test in bad_tests:
             self.assertEqual(test, {})
@@ -224,7 +224,7 @@ class BundleDownloaderTest(unittest.TestCase):
         ]
 
         for test in good_tests:
-            self.assertEqual(test['bundle'], 'mediawiki/single')
+            self.assertEqual(test['entity'], 'mediawiki/single')
 
         for test in bad_tests:
             self.assertEqual(test, {})
