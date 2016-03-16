@@ -4,6 +4,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 
 import requests
@@ -65,7 +66,15 @@ def extract_archive(archive, dir_):
     # Instead we use a shell equivalent of the following:
     #     archive = zipfile.ZipFile(archive, 'r')
     #     archive.extractall(tempdir)
-    check_call('unzip {} -d {}'.format(archive, tempdir))
+    try:
+        check_call('unzip {} -d {}'.format(archive, tempdir))
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            sys.exit(
+                'Failed to extract archive {}. Is the `unzip` program '
+                'installed?'.format(archive))
+        else:
+            raise
     return tempdir
 
 
