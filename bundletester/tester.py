@@ -7,6 +7,8 @@ import sys
 import tempfile
 import textwrap
 
+import pkg_resources
+
 from bundletester import (
     reporter,
     runner,
@@ -63,8 +65,15 @@ def configure():
                         "override the one in the charm or bundle "
                         "being tested.")
     parser.add_argument('--test-pattern', dest="test_pattern")
+    parser.add_argument('--version', action="store_true",
+                        help="Print the current version")
     parser.add_argument('tests', nargs="*")
     options = parser.parse_args()
+
+    if options.version:
+        sys.stdout.write('{}\n'.format(
+            pkg_resources.get_distribution("bundletester").version))
+        sys.exit()
 
     if not options.environment:
         options.environment = current_environment()
