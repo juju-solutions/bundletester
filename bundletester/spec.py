@@ -5,7 +5,7 @@ from distutils.spawn import find_executable
 
 import yaml
 
-from bundletester import (config, models, vcs, utils)
+from bundletester import (config, models, utils)
 
 
 def normalize_path(path, relto):
@@ -216,32 +216,24 @@ def BundleClassifier(directory, options):
     bundle = find_bundle_file(directory, options.bundle)
     if not bundle:
         return None
-    result = {'bundle': bundle,
-              'testdir': utils.find_testdir(directory)}
-    lp = vcs.Launchpad()
-    data = lp.infer_bundle(directory) or {}
-    result.update(data)
-    if 'name' not in data:
-        with open(bundle) as fh:
-            metadata = yaml.safe_load(fh)
-        # XXX: ambiguous
-        result['name'] = metadata.keys()[0]
-    return models.Bundle(**result)
+    return models.Bundle({
+        'bundle': bundle,
+        'testdir': utils.find_testdir(directory),
+        'name': 'bundle',
+    })
 
 
 def CharmClassifier(directory, options):
     metadata = os.path.join(directory, "metadata.yaml")
     if not os.path.exists(metadata):
         return None
-    lp = vcs.Launchpad()
-    data = lp.infer_charm(directory) or {}
     testdir = utils.find_testdir(directory)
     metadata = yaml.safe_load(open(metadata))
-    data['metadata'] = metadata
-    data['testdir'] = testdir
-    if 'name' not in data:
-        data['name'] = metadata['name']
-    return models.Charm(**data)
+    return models.Charm({
+        'metadata': metadata,
+        'testdir': testdir,
+        'name': metadata['name'],
+    })
 
 
 def TestDirClassifier(directory, options):
