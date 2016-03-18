@@ -8,10 +8,12 @@ class Parser(dict):
             'reset': True,
             'bundle': None,
             'virtualenv': False,
+            'virtualenv_python': 'python',
             'tests': "*",
             'excludes': [],
             'sources': [],
             'packages': [],
+            'python_packages': [],
             'makefile': ['lint', 'test'],
             'setup': [],
             'teardown': []
