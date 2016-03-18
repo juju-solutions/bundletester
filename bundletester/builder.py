@@ -141,8 +141,16 @@ class Builder(object):
         subprocess.check_call(['sudo', 'apt-get', 'update', '-qq'])
 
     def install_packages(self):
-        if not self.config.packages:
-            return
-        cmd = ['sudo', 'apt-get', 'install', '-qq', '-y']
-        cmd.extend(self.config.packages)
-        subprocess.check_call(cmd)
+        if self.config.packages:
+            cmd = ['sudo', 'apt-get', 'install', '-qq', '-y']
+            cmd.extend(set(self.config.packages))
+            if (self.config.python_packages and
+                    subprocess.call(['which', 'pip']) != 0):
+                cmd.extend('python-pip')
+            subprocess.check_call(cmd)
+
+        if self.config.python_packages:
+            cmd = ['sudo'] if not self.config.virtualenv else []
+            cmd.extend(['pip', 'install', '-U'])
+            cmd.extend(set(self.config.python_packages))
+            subprocess.check_call(cmd)

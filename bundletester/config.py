@@ -12,6 +12,7 @@ class Parser(dict):
             'excludes': [],
             'sources': [],
             'packages': [],
+            'python_packages': [],
             'makefile': ['lint', 'test'],
             'setup': [],
             'teardown': []

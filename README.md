@@ -103,40 +103,48 @@ A sample `tests.yaml` file::
 
     bootstrap: false
     reset: false
-    setup: script
-    teardown: script
-    tests: "[0-9]*"
     virtualenv: true
+    tests: "[0-9]*"
+    excludes:
+      - `filename`
     sources:
-        - ppas, etc
+      - ppa:ubuntu-lxc/lxd-stable
     packages:
-        - amulet
-        - python-requests
+      - lxd
+    python_packages:
+      - bzr
+      - juju-deployer
+      - amulet
+      - requests
     makefile:
-        - lint
-        - test
+      - lint
+      - test
+    setup: `filename`
+    teardown: `filename`
 
 Explanation of keys:
 
-**bootstrap**: Allow bootstrap of current env, default: true
+**bootstrap**: Bootstrap the environment if necessary (default: true).
 
-**reset**: Use juju-deployer to reset env between test, default: true
+**reset**: Use juju-deployer to reset the environment between each test file execution (default: true).
 
-**virtualenv**: create and activate a virtualenv in which all tests are run, default: false
+**virtualenv**: Create and activate a virtualenv in which all tests are run (default: false).
 
-**tests**: glob of executable files in testdir to treat as tests, default: "\*"
+**tests**: A glob pattern of executable files in the `tests/` directory to treat as tests (default: "\*"). Only files that match this pattern will be executed.
 
-**excludes**: list of charm names for which tests should be skipped
+**excludes**: List of charm names for which tests should be skipped. Useful if executing against a bundle.
 
-**sources**: list of package sources to add automatically
+**sources**: List of apt package sources to add before installing packages.
 
-**packages**: list of packages to install automatically with apt
+**packages**: List of packages to install with apt before running tests.
 
-**makefile**: list of make targets to execute, default: [lint, test]
+**python_packages**: List of python packages to install with `pip install -U` before running tests. If `virtualenv` is `true`, the packages will be installed in the virtualenv.
 
-**setup**: optional name of script in test dir to run before each test
+**makefile**: List of make targets to execute (default: [lint, test]).
 
-**teardown**: optional name of script to run after each test
+**setup**: Optional name of a script in the `tests/` directory to run before each test.
+
+**teardown**: Optional name of script in the `tests/` directory to run after each test.
 
 
 
