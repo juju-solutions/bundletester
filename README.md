@@ -104,6 +104,7 @@ A sample `tests.yaml` file::
     bootstrap: false
     reset: false
     virtualenv: true
+    virtualenv_python: python3
     tests: "[0-9]*"
     excludes:
       - `filename`
@@ -129,6 +130,10 @@ Explanation of keys:
 **reset**: Use juju-deployer to reset the environment between each test file execution (default: true).
 
 **virtualenv**: Create and activate a virtualenv in which all tests are run (default: false).
+
+**virtualenv_python**: The version of python with which to create the
+virtualenv (if `virtualenv` is `true'). Examples: python, python2.7,
+python3.5 (default: python).
 
 **tests**: A glob pattern of executable files in the `tests/` directory to treat as tests (default: "\*"). Only files that match this pattern will be executed.
 

@@ -8,6 +8,7 @@ class Parser(dict):
             'reset': True,
             'bundle': None,
             'virtualenv': False,
+            'virtualenv_python': 'python',
             'tests': "*",
             'excludes': [],
             'sources': [],

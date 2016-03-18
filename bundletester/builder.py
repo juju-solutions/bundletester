@@ -125,8 +125,9 @@ class Builder(object):
                 time.sleep(4)
 
     def build_virtualenv(self, path):
-        subprocess.check_call(['virtualenv', path],
-                              stdout=open('/dev/null', 'w'))
+        subprocess.check_call(
+            ['virtualenv', '-p', self.config.virtualenv_python, path],
+            stdout=open('/dev/null', 'w'))
 
     def add_source(self, source):
         subprocess.check_call(['sudo', 'apt-add-repository', '--yes', source])
