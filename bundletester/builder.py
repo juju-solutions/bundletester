@@ -47,8 +47,8 @@ class Builder(object):
                     return True
                 else:
                     sys.exit(
-                        "Can't bootstrap a Juju {} environment. Please "
-                        "bootstrap before running bundletester.".format(
+                        "Bootstrapping a Juju {} controller is not supported. "
+                        "Please bootstrap before running bundletester.".format(
                             self.options.juju_major_version))
         else:
             self.environment.connect()
