@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import sys
 import time
 
 import websocket
@@ -26,16 +27,29 @@ class Builder(object):
         logging.debug("Bootstrap environment: %s" % self.env_name)
         if self.options.dryrun:
             return
-        ec = subprocess.call(['juju', 'status', '-e', self.env_name],
+        cmd = ['juju', 'status']
+        if self.options.juju_major_version == 1:
+            cmd.append('-e')
+        else:
+            cmd.append('-m')
+        cmd.append(self.env_name)
+
+        ec = subprocess.call(cmd,
                              stdout=open('/dev/null', 'w'),
                              stderr=subprocess.STDOUT)
 
         if ec != 0:
             if self.config.bootstrap is True:
-                logging.info("Bootstrapping Juju Environment...")
-                self.environment.bootstrap()
-                self.environment.connect()
-                return True
+                if self.options.juju_major_version == 1:
+                    logging.info("Bootstrapping Juju Environment...")
+                    self.environment.bootstrap()
+                    self.environment.connect()
+                    return True
+                else:
+                    sys.exit(
+                        "Can't bootstrap a Juju {} environment. Please "
+                        "bootstrap before running bundletester.".format(
+                            self.options.juju_major_version))
         else:
             self.environment.connect()
 

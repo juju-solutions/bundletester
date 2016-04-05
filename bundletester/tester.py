@@ -18,6 +18,11 @@ from bundletester import (
 )
 
 
+def get_juju_major_version():
+    return int(subprocess.check_output(
+        ["juju", "version"]).split(b'.')[0])
+
+
 def current_environment():
     return subprocess.check_output(['juju', 'switch']).strip()
 
@@ -30,6 +35,11 @@ def validate():
 def configure():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        '-e', '--environment',
+        help=('Juju environment or model name. '
+              'For Juju 2 models, must be specified with the '
+              '<controller>:<model> notation.'))
     parser.add_argument('-e', '--environment')
     parser.add_argument('-t', '--testdir', default=os.getcwd())
     parser.add_argument('-b', '-c', '--bundle',
@@ -77,6 +87,9 @@ def configure():
 
     if not options.environment:
         options.environment = current_environment()
+
+    options.juju_major_version = get_juju_major_version()
+
     # Set the environment variable BUNDLE if the bundle argument was provided.
     if options.bundle:
         os.environ['BUNDLE'] = options.bundle

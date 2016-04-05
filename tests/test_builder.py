@@ -16,7 +16,7 @@ class TestBuilder(unittest.TestCase):
         parser = config.Parser()
         b = builder.Builder(parser, None)
         b.build_virtualenv('venv')
-        self.assertEqual(mcall.call_args[0][0], ['virtualenv', 'venv'])
+        self.assertEqual(mcall.call_args[0][0], ['virtualenv', '-p', 'python', 'venv'])
 
     @mock.patch('subprocess.check_call')
     def test_builder_sources(self, mcall):
