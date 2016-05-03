@@ -10,7 +10,7 @@ with open(reqs_file) as f:
 SETUP = {
     'name': "bundletester",
     'packages': find_packages(),
-    'version': "0.5.10",
+    'version': "0.6.0",
     'author': "Juju Developers",
     'author_email': "juju@lists.ubuntu.com",
     'url': "https://github.com/juju-solutions/bundletester",
