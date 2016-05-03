@@ -40,7 +40,6 @@ def configure():
         help=('Juju environment or model name. '
               'For Juju 2 models, must be specified with the '
               '<controller>:<model> notation.'))
-    parser.add_argument('-e', '--environment')
     parser.add_argument('-t', '--testdir', default=os.getcwd())
     parser.add_argument('-b', '-c', '--bundle',
                         type=str,
