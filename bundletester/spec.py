@@ -19,6 +19,9 @@ def Spec(cmd, parent=None, dirname=None, suite=None, name=None):
     testfile = cmd
     if isinstance(cmd, list):
         testfile = find_executable(cmd[0])
+        if not testfile:
+            raise OSError(
+                "Couldn't find executable for command '%s'" % cmd[0])
         cmd[0] = testfile
     else:
         testfile = os.path.abspath(testfile)
