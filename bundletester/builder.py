@@ -101,10 +101,10 @@ class Builder(object):
             # bundletester won't create a new one for you, I think
             # it makes more sense to just reset the model instead,
             # at least for now.
-            self.reset(force=True)
+            self.reset()
 
-    def reset(self, force=False):
-        if self.options.dryrun and not force:
+    def reset(self):
+        if self.options.dryrun:
             return
         if self.environment:
             start, timeout = time.time(), 60
