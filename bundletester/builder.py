@@ -90,12 +90,21 @@ class Builder(object):
         }
 
     def destroy(self):
-        if self.options.no_destroy is not True:
+        if self.options.no_destroy:
+            return
+
+        if self.options.juju_major_version == 1:
             subprocess.check_call(['juju', 'destroy-environment',
                                    '-y', self.env_name, '--force'])
+        else:
+            # We could call 'destroy-model' here instead, but since
+            # bundletester won't create a new one for you, I think
+            # it makes more sense to just reset the model instead,
+            # at least for now.
+            self.reset(force=True)
 
-    def reset(self):
-        if self.options.dryrun:
+    def reset(self, force=False):
+        if self.options.dryrun and not force:
             return
         if self.environment:
             start, timeout = time.time(), 60

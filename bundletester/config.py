@@ -7,6 +7,7 @@ class Parser(dict):
             'bootstrap': True,
             'reset': True,
             'bundle': None,
+            'bundle_deploy': True,
             'virtualenv': False,
             'virtualenv_python': 'python',
             'tests': "*",

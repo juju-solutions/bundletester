@@ -165,7 +165,7 @@ class Suite(list):
         proof = ['charm-proof']
         self.spec(proof,
                   dirname=self.model['directory'], suite=self)
-        for target in self.config.makefile:
+        for target in (self.config.makefile or []):
             self.conditional_make(target, self.model['directory'],
                                   suite=self)
 
