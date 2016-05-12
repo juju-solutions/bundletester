@@ -122,6 +122,7 @@ A sample `tests.yaml` file::
       - test
     setup: `filename`
     teardown: `filename`
+    bundle_deploy: false
 
 Explanation of keys:
 
@@ -151,6 +152,7 @@ python3.5 (default: python).
 
 **teardown**: Optional name of script in the `tests/` directory to run after each test.
 
+**bundle_deploy**: Only applies when testing a bundle. Acceptable values are `true`, `false`, or a file name. If `true` (the default), the bundle will be deployed by juju-deployer before any tests are run. If `false`, the deployment step will be skipped. If a filename is given, it should be an executable file in the `tests/` directory (likely an amulet script). The file will be executed as the deployment step. Useful if you want to deploy the bundle, but need to modify it first. Note that if the `bundle_deploy` filename matches the `tests` glob pattern, it will be executed twice - once in the deploy step, and once as a test. To prevent this, use a `tests` glob pattern that doesn't match the `bundle_deploy` file name.
 
 
 

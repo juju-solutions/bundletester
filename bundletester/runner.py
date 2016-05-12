@@ -4,7 +4,7 @@ import os
 import subprocess
 import traceback
 
-from bundletester import builder, models
+from bundletester import builder
 from bundletester.spec import Suite
 
 log = logging.getLogger('runner')
@@ -132,8 +132,9 @@ class Runner(object):
     def __call__(self):
         self.build()
         bootstrapped = self.builder.bootstrap()
-        if isinstance(self.suite.model, models.Bundle):
-            self._deploy(self.suite.model['bundle'])
+        deploy_cmd = self.suite.deploy_cmd()
+        if deploy_cmd:
+            self._deploy(deploy_cmd)
         for element in self.suite:
             if isinstance(element, Suite):
                 for result in self._run_suite(element):
@@ -150,8 +151,8 @@ class Runner(object):
         if bootstrapped:
             self.builder.destroy()
 
-    def _deploy(self, bundle):
-        deployed = self.builder.deploy(bundle)
+    def _deploy(self, cmd):
+        deployed = self.builder.deploy(cmd)
         if not deployed or deployed and deployed.get('returncode') != 0:
             exc = DeployError()
             exc.result = result = {}
@@ -178,15 +179,15 @@ class Runner(object):
             result.update(self.run(spec, 'setup'))
             if result.get('returncode', 0) == 0:
                 result.update(self.run(spec))
-        except DeployError, e:
+        except DeployError as e:
             result.update(e.result)
         except KeyboardInterrupt:
             result['returncode'] = 1
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             result['returncode'] = e.returncode
             result['output'] = e.output
             result['executable'] = e.cmd
-        except Exception, e:
+        except Exception as e:
             log.exception(e)
             result['returncode'] = 1
             result['output'] = '{}\n{}'.format(

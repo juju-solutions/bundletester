@@ -2,7 +2,10 @@ import pkg_resources
 import os
 import unittest
 
+import mock
+
 from bundletester import config
+from bundletester import models
 from bundletester import spec
 
 TEST_FILES = pkg_resources.resource_filename(__name__, 'files')
@@ -57,3 +60,91 @@ class TestSpec(unittest.TestCase):
         # still found the executable
         self.assertEqual(test.executable,
                          ['/bin/ls', '-al'])
+
+
+class TestDeployCommand(unittest.TestCase):
+
+    def test_not_bundle(self):
+        model = models.Charm({
+            'directory': '',
+            'testdir': ''
+        })
+
+        class options(object):
+            tests_yaml = None
+        suite = spec.Suite(model, options)
+        self.assertIsNone(suite.deploy_cmd())
+
+    def test_bundle_deploy_is_false(self):
+        model = models.Bundle({
+            'directory': '',
+            'testdir': ''
+        })
+
+        class options(object):
+            tests_yaml = None
+        suite = spec.Suite(model, options)
+        suite._config = config.Parser(**{
+            'bundle_deploy': False,
+        })
+        self.assertIsNone(suite.deploy_cmd())
+
+    def test_bundle_deploy_is_true(self):
+        model = models.Bundle({
+            'directory': '',
+            'testdir': '',
+            'bundle': 'mybundle.yaml',
+        })
+
+        class options(object):
+            tests_yaml = None
+            verbose = True
+            deployment = None
+        suite = spec.Suite(model, options)
+        suite._config = config.Parser(**{
+            'bundle_deploy': True
+        })
+        with mock.patch('bundletester.spec.os.path.exists') as exists:
+            def _exists(path):
+                if path == model['bundle']:
+                    return True
+                return os.path.exists(path)
+            exists.side_effect = _exists
+            self.assertEqual(
+                suite.deploy_cmd(),
+                ['juju-deployer', '-Wvd', '-c', model['bundle']]
+            )
+
+    def test_bundle_deploy_file(self):
+        model = models.Bundle({
+            'directory': '',
+            'testdir': 'tests',
+            'bundle': 'mybundle.yaml',
+        })
+
+        class options(object):
+            tests_yaml = None
+        suite = spec.Suite(model, options)
+        suite._config = config.Parser(**{
+            'bundle_deploy': 'mydeployfile'
+        })
+        with mock.patch('bundletester.spec.os.path.isfile') as isfile, \
+                mock.patch('bundletester.spec.os.access') as access:
+            fullpath = os.path.join(
+                model['testdir'], suite.config.bundle_deploy)
+
+            def _isfile(path):
+                if path == fullpath:
+                    return True
+                return os.path.isfile(path)
+
+            def _access(path, flags):
+                if path == fullpath:
+                    return True
+                return os.access(path, flags)
+            isfile.side_effect = _isfile
+            access.side_effect = _access
+            self.assertEqual(
+                suite.deploy_cmd(),
+                [fullpath]
+            )

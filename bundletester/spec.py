@@ -99,6 +99,47 @@ class Suite(list):
                 return True
         return False
 
+    def deploy_cmd(self):
+        """Return the bundle deploy command for this suite.
+
+        If the model for this suite is not a Bundle, returns None.
+        If 'bundle_deploy' in tests.yaml is False (or falsy), returns None.
+        If 'bundle_deploy' in tests.yaml it True, returns a juju-deployer cmd.
+        Else returns 'bundle_deploy' from tests.yaml.
+
+        :return: executable command as a list of args
+
+        """
+        if not isinstance(self.model, models.Bundle):
+            return None
+        if not self.config.bundle_deploy:
+            return None
+        if self.config.bundle_deploy is True:
+            # default deploy
+            bundle = self.model['bundle'] or self.options.bundle
+            if not bundle:
+                return None
+            if not os.path.exists(bundle):
+                raise OSError("Missing required bundle file: %s" % bundle)
+            cmd = ['juju-deployer']
+            if self.options.verbose:
+                cmd.append('-Wvd')
+            cmd += ['-c', bundle]
+            if self.options.deployment:
+                cmd.append(self.options.deployment)
+            return cmd
+        else:
+            # self.config.bundle_deploy is a file name
+            fullpath = os.path.join(self.testdir, self.config.bundle_deploy)
+            if not os.path.isfile(fullpath):
+                raise OSError(
+                    "'bundle_deploy' in tests.yaml points to a non-existent "
+                    "file (%s)" % fullpath)
+            if not os.access(fullpath, os.X_OK | os.R_OK):
+                raise OSError(
+                    "'bundle_deploy' file must be +rx (%s)" % fullpath)
+            return [fullpath]
+
     def find_tests(self):
         if not self.testdir:
             return

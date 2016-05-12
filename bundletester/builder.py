@@ -1,5 +1,4 @@
 import logging
-import os
 import subprocess
 import sys
 import time
@@ -53,23 +52,12 @@ class Builder(object):
         else:
             self.environment.connect()
 
-    def deploy(self, bundle):
+    def deploy(self, cmd):
         result = {
             'returncode': 0
         }
-        bundle = bundle or self.options.bundle
-        if not bundle:
-            return result
-        if not os.path.exists(bundle):
-            raise OSError("Missing required bundle file: %s" % bundle)
         if self.options.dryrun:
             return result
-        cmd = ['juju-deployer']
-        if self.options.verbose:
-            cmd.append('-Wvd')
-        cmd += ['-c', bundle]
-        if self.options.deployment:
-            cmd.append(self.options.deployment)
 
         logging.debug("deploy %s", ' '.join(cmd))
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
