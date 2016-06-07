@@ -70,7 +70,12 @@ class Suite(list):
     def config(self):
         if not self._config:
             testcfg = None
-            if self.options.tests_yaml:
+            if self._parent_config and self.excluded(self._parent_config):
+                # If we're an excluded charm, ignore our tests.yaml. This
+                # will avoid installing packages/ppas for a charm that will
+                # not be tested.
+                pass
+            elif self.options.tests_yaml:
                 file_path = os.path.abspath(
                     os.path.expanduser(self.options.tests_yaml))
                 if os.path.exists(file_path):
@@ -90,10 +95,11 @@ class Suite(list):
             kwargs['suite'] = self
         self.append(Spec(testfile, self.config, **kwargs))
 
-    def excluded(self):
+    def excluded(self, config=None):
+        config = config or self.config
         if not self.options.exclude:
             self.options.exclude = []
-        excludes = set(self.options.exclude).union(set(self.config.excludes))
+        excludes = set(self.options.exclude).union(set(config.excludes))
         for exclude in excludes:
             if exclude in self.name:
                 return True
