@@ -107,7 +107,7 @@ A sample `tests.yaml` file::
     virtualenv_python: python3
     tests: "[0-9]*"
     excludes:
-      - `filename`
+      - `charm-name`
     sources:
       - ppa:ubuntu-lxc/lxd-stable
     packages:

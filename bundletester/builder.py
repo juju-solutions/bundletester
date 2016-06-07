@@ -141,6 +141,7 @@ class Builder(object):
             stdout=open('/dev/null', 'w'))
 
     def add_source(self, source):
+        logging.debug('Adding source: %s', source)
         subprocess.check_call(['sudo', 'apt-add-repository', '--yes', source])
 
     def add_sources(self, update=True):
@@ -150,6 +151,7 @@ class Builder(object):
             self.apt_update()
 
     def apt_update(self):
+        logging.debug('Running `sudo apt-get update -qq`')
         subprocess.check_call(['sudo', 'apt-get', 'update', '-qq'])
 
     def install_packages(self):
