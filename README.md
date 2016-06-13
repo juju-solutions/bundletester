@@ -155,9 +155,9 @@ python3.5 (default: python).
 
 **bundle_deploy**: Only applies when testing a bundle. Acceptable values are `true`, `false`, or a file name. If `true` (the default), the bundle will be deployed by juju-deployer before any tests are run. If `false`, the deployment step will be skipped. If a filename is given, it should be an executable file in the `tests/` directory (likely an amulet script). The file will be executed as the deployment step. Useful if you want to deploy the bundle, but need to modify it first. Note that if the `bundle_deploy` filename matches the `tests` glob pattern, it will be executed twice - once in the deploy step, and once as a test. To prevent this, use a `tests` glob pattern that doesn't match the `bundle_deploy` file name.
 
-**deployment_timeout**: Override the default timeout for the initial bundle
+**deployment_timeout**: Max time (in minutes) allowed for the initial bundle
 deploy (before any tests are run).  This option has no effect if `bundle_deploy`
-has any value other than `true`.
+has any value other than `true` (default: 45).
 
 
 
