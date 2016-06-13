@@ -133,6 +133,8 @@ class Suite(list):
             cmd += ['-c', bundle]
             if self.options.deployment:
                 cmd.append(self.options.deployment)
+            if self.config.deployment_timeout is not None:
+                cmd += ['-t', str(self.config.deployment_timeout)]
             return cmd
         else:
             # self.config.bundle_deploy is a file name

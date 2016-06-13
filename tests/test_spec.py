@@ -148,3 +148,30 @@ class TestDeployCommand(unittest.TestCase):
                 suite.deploy_cmd(),
                 [fullpath]
             )
+
+    def test_timeout(self):
+        model = models.Bundle({
+            'directory': '',
+            'testdir': '',
+            'bundle': 'mybundle.yaml',
+        })
+
+        class options(object):
+            tests_yaml = None
+            verbose = True
+            deployment = None
+        suite = spec.Suite(model, options)
+        suite._config = config.Parser(**{
+            'bundle_deploy': True,
+            'deployment_timeout': 60,
+        })
+        with mock.patch('bundletester.spec.os.path.exists') as exists:
+            def _exists(path):
+                if path == model['bundle']:
+                    return True
+                return os.path.exists(path)
+            exists.side_effect = _exists
+            self.assertEqual(
+                suite.deploy_cmd(),
+                ['juju-deployer', '-Wvd', '-c', model['bundle'], '-t', '60']
+            )
