@@ -134,7 +134,12 @@ class Runner(object):
         bootstrapped = self.builder.bootstrap()
         deploy_cmd = self.suite.deploy_cmd()
         if deploy_cmd:
-            self._deploy(deploy_cmd)
+            try:
+                self._deploy(deploy_cmd)
+            except DeployError as e:
+                yield e.result
+                raise StopIteration
+
         for element in self.suite:
             if isinstance(element, Suite):
                 for result in self._run_suite(element):

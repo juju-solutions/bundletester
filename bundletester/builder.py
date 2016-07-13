@@ -120,19 +120,23 @@ class Builder(object):
                     time.sleep(1)
                     logging.debug('Retrying environment reset...')
 
-            # wait for all services to be removed
-            logging.debug("Waiting for services to be removed...")
+            # wait for all applications to be removed
+            logging.debug("Waiting for applications to be removed...")
             start, timeout = time.time(), 60
             while True:
                 status = self.environment.status()
-                if not status.get('services', {}):
+                if self.options.juju_major_version == 1:
+                    key = 'services'
+                else:
+                    key = 'applications'
+                if not status.get(key):
                     break
                 if (time.time() - start) > timeout:
                     raise RuntimeError(
-                        'Timeout exceeded. Failed to destroy all services '
+                        'Timeout exceeded. Failed to destroy all applications '
                         ' in %s seconds.' % timeout)
                 logging.debug(
-                    " Remaining services: %s", status.get("services").keys())
+                    " Remaining applications: %s", status.get(key).keys())
                 time.sleep(4)
 
     def build_virtualenv(self, path):
