@@ -160,9 +160,24 @@ class Suite(list):
             filterset = [os.path.join(self.testdir, f) for f
                          in self.options.tests]
             tests = tests.intersection(set(filterset))
+
+        exec_tests = []
         for test in sorted(tests):
             if os.path.isfile(test) and os.access(test, os.X_OK | os.R_OK):
+                exec_tests.append(test)
                 self.spec(test, dirname=self.model['directory'], suite=self)
+
+        # When a test pattern is provided, expect at least one executable
+        # glob match, otherwise fail.
+        if testpat and not exec_tests:
+            raise OSError('Expected at least one executable pattern '
+                          'match for: {}'.format(testpat))
+
+        # When one or more test name arguments are provided, expect ALL
+        # arguments to exist as executable files, otherwise fail.
+        if self.options.tests and len(self.options.tests) != len(exec_tests):
+            raise OSError('Expected executable test files: '
+                          '{}'.format(self.options.tests))
 
     def find_suite(self):
         """Find and prepend charms tests to our suite of tests.
