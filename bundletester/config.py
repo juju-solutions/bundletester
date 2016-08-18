@@ -6,6 +6,7 @@ class Parser(dict):
         return {
             'bootstrap': True,
             'reset': True,
+            'reset_timeout': 60,
             'bundle': None,
             'bundle_deploy': True,
             'deployment_timeout': None,
