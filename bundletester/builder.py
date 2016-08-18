@@ -95,7 +95,7 @@ class Builder(object):
         if self.options.dryrun:
             return
         if self.environment:
-            start, timeout = time.time(), 60
+            start, timeout = time.time(), self.config.reset_timeout
             while True:
                 try:
                     self.environment.reset(
@@ -122,7 +122,7 @@ class Builder(object):
 
             # wait for all applications to be removed
             logging.debug("Waiting for applications to be removed...")
-            start, timeout = time.time(), 60
+            start, timeout = time.time(), self.config.reset_timeout
             while True:
                 status = self.environment.status()
                 if self.options.juju_major_version == 1:
