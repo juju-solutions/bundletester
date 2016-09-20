@@ -167,9 +167,11 @@ class Suite(list):
                 exec_tests.append(test)
                 self.spec(test, dirname=self.model['directory'], suite=self)
 
-        # When a test pattern is provided, expect at least one executable
-        # glob match, otherwise fail.
-        if testpat and not exec_tests:
+        # When a test pattern is provided (other than the default), expect
+        # at least one executable glob match, otherwise fail.
+        if (testpat and
+                testpat != config.Parser().__defaults__()['tests'] and not
+                exec_tests):
             raise OSError('Expected at least one executable pattern '
                           'match for: {}'.format(testpat))
 
