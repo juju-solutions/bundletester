@@ -1,7 +1,9 @@
 import argparse
+import atexit
 import logging
 import os
 from collections import namedtuple
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -119,9 +121,10 @@ def main(options=None):
 
     try:
         fetcher = fetchers.get_fetcher(options.testdir)
+        tmpdir = tempfile.mkdtemp(prefix='bundletester-')
+        atexit.register(shutil.rmtree, tmpdir)
         options.fetcher = fetcher
-        options.testdir = fetcher.fetch(
-            tempfile.mkdtemp(prefix='bundletester-'))
+        options.testdir = fetcher.fetch(tmpdir)
     except fetchers.FetchError as e:
         sys.stderr.write("{}\n".format(e))
         return get_return_data(1, None)
