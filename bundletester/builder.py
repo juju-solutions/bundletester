@@ -1,3 +1,4 @@
+import os
 import logging
 import subprocess
 import sys
@@ -9,6 +10,8 @@ from deployer.env.go import GoEnvironment
 
 class Builder(object):
     """Build out the system-level environment needed to run tests"""
+    APT_NO_LOCK = 100  # The return code for "couldn't acquire lock" in APT
+    APT_NO_LOCK_RETRY_DELAY = 10
 
     def __init__(self, config, options):
         self.config = config
@@ -144,6 +147,34 @@ class Builder(object):
             ['virtualenv', '-p', self.config.virtualenv_python, path],
             stdout=open('/dev/null', 'w'))
 
+    def _run_apt_command(self, cmd, retries=3):
+        """
+        Run an APT command, retrying if failed.
+
+        :param: cmd: str: The apt command to run.
+        :param: fatal: bool: Whether the command's output should be checked and
+            retried.
+        """
+        env = os.environ.copy()
+
+        if 'DEBIAN_FRONTEND' not in env:
+            env['DEBIAN_FRONTEND'] = 'noninteractive'
+
+        result = None
+        retry_count = 0
+        while result is None or result == self.APT_NO_LOCK:
+            try:
+                result = subprocess.check_call(cmd, env=env)
+            except subprocess.CalledProcessError as e:
+                retry_count = retry_count + 1
+                if retry_count > retries:
+                    raise
+                result = e.returncode
+                logging.info(
+                    "Couldn't acquire DPKG lock. Will retry in {} seconds."
+                    "".format(self.APT_NO_LOCK_RETRY_DELAY))
+                time.sleep(self.APT_NO_LOCK_RETRY_DELAY)
+
     def add_source(self, source):
         logging.debug('Adding source: %s', source)
         subprocess.check_call(['sudo', 'apt-add-repository', '--yes', source])
@@ -156,7 +187,7 @@ class Builder(object):
 
     def apt_update(self):
         logging.debug('Running `sudo apt-get update -qq`')
-        subprocess.check_call(['sudo', 'apt-get', 'update', '-qq'])
+        self._run_apt_command(['sudo', 'apt-get', 'update', '-qq'])
 
     def install_packages(self):
         if self.config.packages:
@@ -165,7 +196,7 @@ class Builder(object):
             if (self.config.python_packages and
                     subprocess.call(['which', 'pip']) != 0):
                 cmd.extend('python-pip')
-            subprocess.check_call(cmd)
+            self._run_apt_command(cmd)
 
         if self.config.python_packages:
             cmd = ['sudo'] if not self.config.virtualenv else []

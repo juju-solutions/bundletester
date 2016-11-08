@@ -37,7 +37,7 @@ class TestBuilder(unittest.TestCase):
         b.install_packages()
         self.assertEqual(mcall.call_args,
                          mock.call(['sudo', 'apt-get', 'install', '-qq', '-y',
-                                    'a', 'b']))
+                                    'a', 'b'], env=mock.ANY))
 
     @mock.patch('subprocess.call')
     def test_builder_bootstrap_dryrun(self, mcall):
