@@ -17,6 +17,7 @@ class Parser(dict):
             'sources': [],
             'packages': [],
             'python_packages': [],
+            'requirements': [],
             'makefile': ['lint', 'test'],
             'setup': [],
             'teardown': []

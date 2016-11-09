@@ -198,8 +198,12 @@ class Builder(object):
                 cmd.extend('python-pip')
             self._run_apt_command(cmd)
 
-        if self.config.python_packages:
+        if self.config.python_packages or self.config.requirements:
             cmd = ['sudo'] if not self.config.virtualenv else []
             cmd.extend(['pip', 'install', '-U'])
-            cmd.extend(set(self.config.python_packages))
+            for requirement in self.config.requirements:
+                if os.path.exists(requirement):
+                    cmd.extend(['--requirement', requirement])
+            if self.config.python_packages:
+                cmd.extend(set(self.config.python_packages))
             subprocess.check_call(cmd)

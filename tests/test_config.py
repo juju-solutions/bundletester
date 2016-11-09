@@ -22,6 +22,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(parser.packages, [])
         self.assertEqual(parser.makefile, ['lint', 'test'])
         self.assertEqual(parser.setup, [])
+        self.assertEqual(parser.requirements, [])
 
     def test_config_parse(self):
         parser = config.Parser(locate('sample.yaml'))
@@ -31,6 +32,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(parser.sources, [])
         self.assertEqual(parser.packages, [])
         self.assertEqual(parser.setup, ['setupAll'])
+        self.assertEqual(parser.requirements, [])
 
     def test_config_parent(self):
         parent = config.Parser()

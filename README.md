@@ -117,6 +117,9 @@ A sample `tests.yaml` file::
       - juju-deployer
       - amulet
       - requests
+    requirements:
+      - test-requirements.txt
+      - requirements.txt
     makefile:
       - lint
       - test
