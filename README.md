@@ -152,6 +152,12 @@ python3.5 (default: python).
 
 **python_packages**: List of python packages to install with `pip install -U` before running tests. If `virtualenv` is `true`, the packages will be installed in the virtualenv.
 
+**requirements**: List of pip requirements file names (relative to the
+charm or bundle root dir), which will be
+passed to `pip install -r`. If `virtualenv` is true, the packages will
+be installed in the virtualenv, otherwise they will be installed at the
+system level.  (default: [])
+
 **makefile**: List of make targets to execute (default: [lint, test]).
 
 **setup**: Optional name of a script in the `tests/` directory to run before each test.

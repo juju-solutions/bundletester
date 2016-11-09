@@ -202,8 +202,10 @@ class Builder(object):
             cmd = ['sudo'] if not self.config.virtualenv else []
             cmd.extend(['pip', 'install', '-U'])
             for requirement in self.config.requirements:
-                if os.path.exists(requirement):
-                    cmd.extend(['--requirement', requirement])
+                requirement_path = os.path.join(
+                    self.options.testdir, requirement)
+                if os.path.exists(requirement_path):
+                    cmd.extend(['--requirement', requirement_path])
             if self.config.python_packages:
                 cmd.extend(set(self.config.python_packages))
             subprocess.check_call(cmd)
