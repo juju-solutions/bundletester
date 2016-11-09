@@ -117,6 +117,9 @@ A sample `tests.yaml` file::
       - juju-deployer
       - amulet
       - requests
+    requirements:
+      - test-requirements.txt
+      - requirements.txt
     makefile:
       - lint
       - test
@@ -148,6 +151,12 @@ python3.5 (default: python).
 **packages**: List of packages to install with apt before running tests.
 
 **python_packages**: List of python packages to install with `pip install -U` before running tests. If `virtualenv` is `true`, the packages will be installed in the virtualenv.
+
+**requirements**: List of pip requirements file names (relative to the
+charm or bundle root dir), which will be
+passed to `pip install -r`. If `virtualenv` is true, the packages will
+be installed in the virtualenv, otherwise they will be installed at the
+system level.  (default: [])
 
 **makefile**: List of make targets to execute (default: [lint, test]).
 
