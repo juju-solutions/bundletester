@@ -1,8 +1,10 @@
 import json
 import logging
 import sys
+import re
 from collections import defaultdict
 from itertools import repeat
+from xml.etree.ElementTree import Element, SubElement, tostring
 
 from blessings import Terminal
 
@@ -170,9 +172,39 @@ class JSONReporter(Reporter):
         self.write('\n')
         self.fp.flush()
 
+
+class XMLReporter(Reporter):
+    def summary(self):
+        opts = self.options
+        top = Element('testsuites')
+
+        testsuitename = "{}-{}".format(opts.testdir,
+                                       str(opts.fetcher.get_revision(opts.testdir)).strip())
+        testsuite = SubElement(top, 'testsuite', {"name": testsuitename, "tests": "{}".format(len(self.messages))})
+        for msg in self.messages:
+            testcase = SubElement(testsuite, 'testcase',
+                                  {"name": msg.test,
+                                   "classname": msg.suite,
+                                   "time": "{}".format(msg.get('duration', 0))})
+            if msg.returncode != 0:
+                errorelement = SubElement(testcase, 'error', {"message": self.get_error(msg)})
+                errorelement.text = msg.output
+
+        self.fp.write(tostring(top, encoding="utf-8"))
+        self.fp.flush()
+
+    def get_error(self, msg):
+        m = re.search('ERROR[A-Za-z\t .]+', msg.output)
+        if m:
+            found = m.group(0)
+            return found
+        return "Unknown"
+
+
 FACTORY = {'json': JSONReporter,
            'dot': DotReporter,
-           'spec': SpecReporter}
+           'spec': SpecReporter,
+           'xml': XMLReporter}
 
 
 def get_reporter(name, fp, options):
