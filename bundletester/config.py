@@ -2,6 +2,8 @@ import yaml
 
 
 class Parser(dict):
+    DEFAULT_MAKE_TARGETS = ['lint', 'test']
+
     def __defaults__(self):
         return {
             'bootstrap': True,
@@ -18,7 +20,7 @@ class Parser(dict):
             'packages': [],
             'python_packages': [],
             'requirements': [],
-            'makefile': ['lint', 'test'],
+            'makefile': list(Parser.DEFAULT_MAKE_TARGETS),
             'setup': [],
             'teardown': []
         }
@@ -26,6 +28,7 @@ class Parser(dict):
     def __init__(self, path=None, parent=None, **kwargs):
         if not parent:
             parent = self.__defaults__()
+
         self.merge(parent)
         if kwargs:
             self.merge(kwargs)

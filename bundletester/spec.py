@@ -2,7 +2,7 @@ import glob
 import os
 import subprocess
 from distutils.spawn import find_executable
-
+from config import Parser
 import yaml
 
 from bundletester import (config, models, utils)
@@ -232,8 +232,14 @@ class Suite(list):
         self.spec(proof,
                   dirname=self.model['directory'], suite=self)
         for target in (self.config.makefile or []):
-            self.conditional_make(target, self.model['directory'],
-                                  suite=self)
+            if target in Parser.DEFAULT_MAKE_TARGETS:
+                self.conditional_make(target, self.model['directory'],
+                                      suite=self)
+            else:
+                self.spec(['make', '-s', target],
+                          name="make {}".format(target),
+                          dirname=self.model['directory'],
+                          suite=self)
 
 
 def filter_yamls(yamls):
