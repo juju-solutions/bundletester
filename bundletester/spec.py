@@ -1,3 +1,4 @@
+import errno
 import glob
 import os
 import subprocess
@@ -191,9 +192,12 @@ class Suite(list):
         """
         if self.excluded():
             return
-        if isinstance(self.model, (models.Bundle, models.Charm)):
-            if not self.options.skip_implicit:
-                self.find_implicit_tests()
+
+        is_bundle = isinstance(self.model, models.Bundle)
+        is_charm = isinstance(self.model, models.Charm)
+
+        if (is_charm or is_bundle) and not self.options.skip_implicit:
+            self.find_implicit_tests()
 
         if isinstance(self.model, models.Bundle):
             deployment = utils.fetch_deployment(self.config.bundle,
@@ -206,6 +210,8 @@ class Suite(list):
                 if len(charm_suite):
                     self.insert(0, charm_suite)
         self.find_tests()
+        if is_bundle and not self.options.skip_implicit:
+            self.conditional_matrix(self.model['directory'])
 
     def conditional_make(self, target, entitydir, suite=None):
         cwd = os.getcwd()
@@ -221,6 +227,20 @@ class Suite(list):
                       dirname=entitydir,
                       suite=suite)
         os.chdir(cwd)
+
+    def conditional_matrix(self, dirname):
+        """
+        Add matrix test to bundle suite if installed.
+        """
+        try:
+            subprocess.call(['matrix', '--help'],
+                            stdout=open('/dev/null', 'w'),
+                            stderr=subprocess.STDOUT)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+        else:
+            self.spec(['matrix', '-s', 'raw'], name='matrix', dirname=dirname)
 
     def find_implicit_tests(self):
         # Look for implicit targets and map these as tests
