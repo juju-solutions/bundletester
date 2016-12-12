@@ -243,7 +243,9 @@ class Suite(list):
             if e.errno != errno.ENOENT:
                 raise
         else:
-            self.spec(['matrix', '-s', 'raw'], name='matrix', dirname=dirname)
+            controller, _ = self.options.environment.split(':')
+            self.spec(['matrix', '-s', 'raw', '-c', controller],
+                      name='matrix', dirname=dirname)
 
     def find_implicit_tests(self):
         # Look for implicit targets and map these as tests
