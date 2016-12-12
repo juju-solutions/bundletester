@@ -232,6 +232,9 @@ class Suite(list):
         """
         Add matrix test to bundle suite if installed.
         """
+        if self.options.juju_major_version < 2:
+            # matrix currently requires Juju 2.0+
+            return
         try:
             subprocess.call(['matrix', '--help'],
                             stdout=open('/dev/null', 'w'),
