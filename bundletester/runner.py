@@ -55,6 +55,7 @@ class Runner(object):
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             cwd=cwd,
+            env=dict(os.environ, PYTHONIOENCODING='utf8'),
         )
 
         # Print all output as it comes in to debug

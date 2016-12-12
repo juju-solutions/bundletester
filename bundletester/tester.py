@@ -1,5 +1,4 @@
 import argparse
-import atexit
 import logging
 import os
 from collections import namedtuple
@@ -119,32 +118,38 @@ def main(options=None):
     if not options.output:
         options.output = sys.stdout
 
+    tmpdir = None
     try:
-        fetcher = fetchers.get_fetcher(options.testdir)
-        tmpdir = tempfile.mkdtemp(prefix='bundletester-')
-        atexit.register(shutil.rmtree, tmpdir)
-        options.fetcher = fetcher
-        options.testdir = fetcher.fetch(tmpdir)
-    except fetchers.FetchError as e:
-        sys.stderr.write("{}\n".format(e))
-        return get_return_data(1, None)
+        try:
+            fetcher = fetchers.get_fetcher(options.testdir)
+            tmpdir = tempfile.mkdtemp(prefix='bundletester-')
+            options.fetcher = fetcher
+            options.testdir = fetcher.fetch(tmpdir)
+        except fetchers.FetchError as e:
+            sys.stderr.write("{}\n".format(e))
+            return get_return_data(1, None)
 
-    suite = spec.SuiteFactory(options, options.testdir)
+        suite = spec.SuiteFactory(options, options.testdir)
 
-    if not suite:
-        sys.stderr.write("No Tests Found\n")
-        return get_return_data(3, None)
+        if not suite:
+            sys.stderr.write("No Tests Found\n")
+            return get_return_data(3, None)
 
-    report = reporter.get_reporter(options.reporter, options.output, options)
-    report.set_suite(suite)
-    run = runner.Runner(suite, options)
-    report.header()
-    if len(suite):
-        with utils.juju_env(options.environment):
-            [report.emit(result) for result in run()]
-    report.summary()
-    return_code = report.exit()
-    status = get_return_data(return_code, suite)
+        report = reporter.get_reporter(options.reporter,
+                                       options.output,
+                                       options)
+        report.set_suite(suite)
+        run = runner.Runner(suite, options)
+        report.header()
+        if len(suite):
+            with utils.juju_env(options.environment):
+                [report.emit(result) for result in run()]
+        report.summary()
+        return_code = report.exit()
+        status = get_return_data(return_code, suite)
+    finally:
+        if tmpdir:
+            shutil.rmtree(tmpdir)
     return status
 
 

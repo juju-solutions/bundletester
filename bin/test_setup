@@ -11,6 +11,6 @@ if [ ! -d .venv ]; then
     pip install --upgrade pip
     pip install wheel
     pip install --use-wheel -f deps -r requirements.txt
-    pip install --use-wheel -f deps --no-index .
+    pip install --use-wheel -f deps --no-index -e .
 fi
 
