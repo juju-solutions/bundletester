@@ -173,7 +173,10 @@ class Runner(object):
             yield self._run_test(spec)
 
     def _run_test(self, spec):
-        result = {}
+        result = {
+            'test': spec.name,
+            'returncode': 0
+        }
         cwd = os.getcwd()
         try:
             if spec.reset:
