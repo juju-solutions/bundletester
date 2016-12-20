@@ -36,7 +36,7 @@ class Charm(FSEntity):
 
         charm_dir = os.path.join(tmp_dir, charm_name)
         shutil.copytree(dcharm.path, charm_dir, symlinks=True)
-        atexit.register(shutil.rmtree, tmp_dir)
+        atexit.register(shutil.rmtree, tmp_dir, ignore_errors=True)
 
         c = cls()
         c['name'] = dcharm.name
