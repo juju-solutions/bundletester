@@ -1,5 +1,6 @@
 PYTHON := /usr/bin/env python
 PROJECT=bundletester
+VERSION=$(shell cat VERSION)
 
 all: lint test
 
@@ -35,7 +36,10 @@ lint:
 	./bin/test_setup
 
 release:
+	git remote | xargs -L1 git fetch --tags
 	$(PYTHON) setup.py register sdist upload
+	git tag ${VERSION}
+	git remote | xargs -L1 git push --tags
 	@if [ -n "${CHARMBOX_TOKEN}" ]; then \
 	    echo 'Rebuilding charmbox' ; \
 	    curl --data "build=true" -X POST https://registry.hub.docker.com/u/johnsca/charmbox/trigger/$(CHARMBOX_TOKEN)/ ; \
