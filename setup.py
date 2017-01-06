@@ -7,10 +7,15 @@ with open(reqs_file) as f:
     reqs = [line for line in f.read().splitlines()
             if not line.startswith('--')]
 
+version_file = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            'VERSION'))
+with open(version_file) as v:
+    VERSION = v.read().strip()
+
 SETUP = {
     'name': "bundletester",
     'packages': find_packages(),
-    'version': "0.10.2",
+    'version': VERSION,
     'author': "Juju Developers",
     'author_email': "juju@lists.ubuntu.com",
     'url': "https://github.com/juju-solutions/bundletester",
