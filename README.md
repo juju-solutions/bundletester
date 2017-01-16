@@ -4,7 +4,7 @@ A juju-deployer based test runner for bundles and charms.
 
 # Installation
 
-    pip install bundletester
+    pip2 install bundletester
 
 # Introduction
 
