@@ -106,6 +106,29 @@ class Suite(list):
                 return True
         return False
 
+    def _deployer_cmd(self, bundle):
+        cmd = ['juju-deployer']
+        if self.options.verbose:
+            cmd.append('-Wvd')
+        cmd += ['-c', bundle]
+        if self.options.deployment:
+            cmd.append(self.options.deployment)
+        if self.config.deployment_timeout is not None:
+            cmd += ['-t', str(self.config.deployment_timeout)]
+        return cmd
+
+    def _deploy_cmd(self, bundle):
+        cmd = ['juju', 'deploy', bundle]
+        return cmd
+
+    def wait_cmd(self):
+        if self.options.juju_major_version == 1:
+            return None
+        cmd = ['juju-wait', '-v']
+        if self.config.deployment_timeout is not None:
+            cmd.extend(['-t', str(self.config.deployment_timeout)])
+        return cmd
+
     def deploy_cmd(self):
         """Return the bundle deploy command for this suite.
 
@@ -128,14 +151,10 @@ class Suite(list):
                 return None
             if not os.path.exists(bundle):
                 raise OSError("Missing required bundle file: %s" % bundle)
-            cmd = ['juju-deployer']
-            if self.options.verbose:
-                cmd.append('-Wvd')
-            cmd += ['-c', bundle]
-            if self.options.deployment:
-                cmd.append(self.options.deployment)
-            if self.config.deployment_timeout is not None:
-                cmd += ['-t', str(self.config.deployment_timeout)]
+            if self.options.juju_major_version == 1:
+                cmd = self._deployer_cmd(bundle)
+            else:
+                cmd = self._deploy_cmd(bundle)
             return cmd
         else:
             # self.config.bundle_deploy is a file name
