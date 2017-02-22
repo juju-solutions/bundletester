@@ -1,5 +1,6 @@
 PYTHON := /usr/bin/env python
 PROJECT=bundletester
+TESTS=tests
 VERSION=$(shell cat VERSION)
 
 all: lint test

@@ -23,6 +23,12 @@ class O(object):
 class TestRunner(unittest.TestCase):
 
     def test_run_suite(self):
+        self.run_suite(juju_major_version=2)
+
+    def test_run_suite_juju_1(self):
+        self.run_suite(juju_major_version=1)
+
+    def run_suite(self, juju_major_version):
         logging.basicConfig(level=logging.CRITICAL)
         parser = config.Parser()
         parser.bootstrap = False
@@ -30,7 +36,8 @@ class TestRunner(unittest.TestCase):
         options.dryrun = True
         options.environment = 'local'
         options.failfast = True
-        options.tests_yaml=None
+        options.tests_yaml = None
+        options.juju_major_version = juju_major_version
         model = models.TestDir({'name': 'testdir',
                                 'directory': TEST_FILES,
                                 'testdir': TEST_FILES})
