@@ -134,7 +134,7 @@ Explanation of keys:
 
 **reset**: Use juju-deployer to reset the model between each test file execution (default: true).
 
-**reset_timeout**: Max time (in seconds) allowed for each of two routines in a model reset:  machine termination, and application removal.  Total wait time can be 2X this value.  This option has no effect if `reset` has any value other than `true` (default: 60).
+**reset_timeout**: Max time (in seconds) allowed for each of two routines in a model reset:  machine termination, and application removal.  Total wait time can be 2X this value.  This option has no effect if `reset` has any value other than `true` (default: 180).
 
 **virtualenv**: Create and activate a virtualenv in which all tests are run (default: false).
 

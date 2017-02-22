@@ -3,6 +3,7 @@ import logging
 import subprocess
 import sys
 import time
+import errno
 
 import websocket
 from deployer.env.go import GoEnvironment
@@ -108,13 +109,21 @@ class Builder(object):
                     )
                     break
                 except Exception as e:
-                    logging.exception(e)
-
-                    if isinstance(
-                            e, websocket.WebSocketConnectionClosedException):
-                        logging.debug('Reconnectinng to environment...')
+                    reconnect_errors = [
+                        errno.ETIMEDOUT,
+                        errno.EPIPE,
+                        errno.ECONNABORTED,
+                        errno.ECONNRESET,
+                        errno.ENETRESET,
+                    ]
+                    if (isinstance(
+                            e, websocket.WebSocketConnectionClosedException) or
+                            getattr(e, 'errno', None) in reconnect_errors):
+                        logging.debug('Reconnecting to environment...')
                         self.environment.connect()
                         continue
+
+                    logging.exception(e)
 
                     if (time.time() - start) > timeout:
                         raise RuntimeError(
