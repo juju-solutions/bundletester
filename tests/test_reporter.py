@@ -52,7 +52,8 @@ class TestReporter(unittest.TestCase):
     def test_xml_reporter(self):
         output = self.get_report_output("XML")
         tree = ElementTree.fromstring(output)
-        self.assertEqual(tree.findall('testsuite')[0].attrib['name'], "/tmp/test-1")
+        self.assertEqual(tree.findall('testsuite')[0].attrib['name'],
+                         "/tmp/test-1")
         self.assertEqual(tree.findall('testsuite')[0]
                          .findall("testcase")[1]
                          .find('error').attrib['message'], "Unknown")
