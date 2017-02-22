@@ -130,13 +130,22 @@ class Runner(object):
             stop = True
         return result, stop
 
+    @staticmethod
+    def wait_for_deployment(wait_cmd):
+        if wait_cmd:
+            log.info('Waiting for deployment to complete.')
+            status = subprocess.check_output(wait_cmd)
+            log.info('Waiting completed: {}'.format(status))
+
     def __call__(self):
         self.build()
         bootstrapped = self.builder.bootstrap()
         deploy_cmd = self.suite.deploy_cmd()
+        wait_cmd = self.suite.wait_cmd()
         if deploy_cmd:
             try:
                 self._deploy(deploy_cmd)
+                self.wait_for_deployment(wait_cmd)
             except DeployError as e:
                 yield e.result
                 raise StopIteration

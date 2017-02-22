@@ -89,17 +89,10 @@ class TestDeployCommand(unittest.TestCase):
         })
         self.assertIsNone(suite.deploy_cmd())
 
-    def test_bundle_deploy_is_true(self):
-        model = models.Bundle({
-            'directory': '',
-            'testdir': '',
-            'bundle': 'mybundle.yaml',
-        })
+    def test_bundle_deploy_is_true_juju_1(self):
+        model = fake_model()
+        options = FakeOptions(juju_major_version=1)
 
-        class options(object):
-            tests_yaml = None
-            verbose = True
-            deployment = None
         suite = spec.Suite(model, options)
         suite._config = config.Parser(**{
             'bundle_deploy': True
@@ -112,15 +105,28 @@ class TestDeployCommand(unittest.TestCase):
             exists.side_effect = _exists
             self.assertEqual(
                 suite.deploy_cmd(),
-                ['juju-deployer', '-Wvd', '-c', model['bundle']]
-            )
+                ['juju-deployer', '-Wvd', '-c', model['bundle']])
+
+    def test_bundle_deploy_is_true(self):
+        model = fake_model()
+        options = FakeOptions(juju_major_version=2)
+
+        suite = spec.Suite(model, options)
+        suite._config = config.Parser(**{
+            'bundle_deploy': True
+        })
+        with mock.patch('bundletester.spec.os.path.exists') as exists:
+            def _exists(path):
+                if path == model['bundle']:
+                    return True
+                return os.path.exists(path)
+            exists.side_effect = _exists
+            self.assertEqual(
+                suite.deploy_cmd(),
+                ['juju', 'deploy', model['bundle']])
 
     def test_bundle_deploy_file(self):
-        model = models.Bundle({
-            'directory': '',
-            'testdir': 'tests',
-            'bundle': 'mybundle.yaml',
-        })
+        model = fake_model()
 
         class options(object):
             tests_yaml = None
@@ -149,17 +155,10 @@ class TestDeployCommand(unittest.TestCase):
                 [fullpath]
             )
 
-    def test_timeout(self):
-        model = models.Bundle({
-            'directory': '',
-            'testdir': '',
-            'bundle': 'mybundle.yaml',
-        })
+    def test_timeout_juju_1(self):
+        model = fake_model()
+        options = FakeOptions(juju_major_version=1)
 
-        class options(object):
-            tests_yaml = None
-            verbose = True
-            deployment = None
         suite = spec.Suite(model, options)
         suite._config = config.Parser(**{
             'bundle_deploy': True,
@@ -175,3 +174,44 @@ class TestDeployCommand(unittest.TestCase):
                 suite.deploy_cmd(),
                 ['juju-deployer', '-Wvd', '-c', model['bundle'], '-t', '60']
             )
+            cmd = suite.wait_cmd()
+            self.assertIsNone(cmd)
+
+    def test_timeout(self):
+        model = fake_model()
+        options = FakeOptions(juju_major_version=2)
+
+        suite = spec.Suite(model, options)
+        suite._config = config.Parser(**{
+            'bundle_deploy': True,
+            'deployment_timeout': 60,
+        })
+        with mock.patch('bundletester.spec.os.path.exists') as exists:
+            def _exists(path):
+                if path == model['bundle']:
+                    return True
+                return os.path.exists(path)
+            exists.side_effect = _exists
+            self.assertEqual(
+                suite.deploy_cmd(),
+                ['juju', 'deploy', 'mybundle.yaml']
+            )
+            cmd = suite.wait_cmd()
+            self.assertEqual(cmd, ['juju-wait', '-v', '-t', '60'])
+
+
+def fake_model():
+    return models.Bundle({
+        'directory': '',
+        'testdir': '',
+        'bundle': 'mybundle.yaml',
+    })
+
+
+class FakeOptions:
+    tests_yaml = None
+    verbose = True
+    deployment = None
+
+    def __init__(self, juju_major_version):
+        self.juju_major_version = juju_major_version

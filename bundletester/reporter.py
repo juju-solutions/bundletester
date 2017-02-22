@@ -178,16 +178,24 @@ class XMLReporter(Reporter):
         opts = self.options
         top = Element('testsuites')
 
-        testsuitename = "{}-{}".format(opts.testdir,
-                                       str(opts.fetcher.get_revision(opts.testdir)).strip())
-        testsuite = SubElement(top, 'testsuite', {"name": testsuitename, "tests": "{}".format(len(self.messages))})
+        testsuitename = "{}-{}".format(
+            opts.testdir,
+            str(opts.fetcher.get_revision(opts.testdir)).strip())
+        testsuite = SubElement(
+            top,
+            'testsuite',
+            {"name": testsuitename, "tests": "{}".format(len(self.messages))})
         for msg in self.messages:
-            testcase = SubElement(testsuite, 'testcase',
-                                  {"name": msg.test,
-                                   "classname": msg.suite,
-                                   "time": "{}".format(msg.get('duration', 0))})
+            testcase = SubElement(
+                testsuite,
+                'testcase',
+                {"name": msg.test, "classname": msg.suite, "time": "{}".format(
+                    msg.get('duration', 0))})
             if msg.returncode != 0:
-                errorelement = SubElement(testcase, 'error', {"message": self.get_error(msg)})
+                errorelement = SubElement(
+                    testcase,
+                    'error',
+                    {"message": self.get_error(msg)})
                 errorelement.text = msg.output
 
         self.fp.write(tostring(top, encoding="utf-8"))
