@@ -119,6 +119,8 @@ class Suite(list):
 
     def _deploy_cmd(self, bundle):
         cmd = ['juju', 'deploy', bundle]
+        if self.options.deployment:
+            cmd.append(self.options.deployment)
         return cmd
 
     def wait_cmd(self):
