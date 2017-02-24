@@ -199,6 +199,25 @@ class TestDeployCommand(unittest.TestCase):
             cmd = suite.wait_cmd()
             self.assertEqual(cmd, ['juju-wait', '-v', '-t', '60'])
 
+    def test_deploy_cmd(self):
+        model = fake_model()
+        options = FakeOptions(juju_major_version=2)
+
+        suite = spec.Suite(model, options)
+        cmd = suite._deploy_cmd('foo-bundle')
+        self.assertEqual(cmd, ['juju', 'deploy', 'foo-bundle'])
+
+    def test_deploy_cmd_plan_and_budget(self):
+        model = fake_model()
+        options = FakeOptions(juju_major_version=2)
+        options.deploy_plan = 'foo'
+        options.deploy_budget = 'bar'
+
+        suite = spec.Suite(model, options)
+        cmd = suite._deploy_cmd('foo-bundle')
+        self.assertEqual(cmd, ['juju', 'deploy', 'foo-bundle', '--plan', 'foo',
+                               '--budget', 'bar'])
+
 
 def fake_model():
     return models.Bundle({
@@ -212,6 +231,8 @@ class FakeOptions:
     tests_yaml = None
     verbose = True
     deployment = None
+    deploy_plan = None
+    deploy_budget = None
 
     def __init__(self, juju_major_version):
         self.juju_major_version = juju_major_version

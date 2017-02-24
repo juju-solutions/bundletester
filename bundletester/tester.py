@@ -78,6 +78,11 @@ def configure():
     parser.add_argument('--version', action="store_true",
                         help="Print the current version")
     parser.add_argument('tests', nargs="*")
+
+    parser.add_argument('--deploy-plan',
+                        help='A plan to deploy charm under')
+    parser.add_argument('--deploy-budget',
+                        help='Deploy budget and allocation limit')
     options = parser.parse_args()
 
     if options.version:

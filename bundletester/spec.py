@@ -121,6 +121,10 @@ class Suite(list):
         cmd = ['juju', 'deploy', bundle]
         if self.options.deployment:
             cmd.append(self.options.deployment)
+        if self.options.deploy_plan:
+            cmd.extend(['--plan', self.options.deploy_plan])
+        if self.options.deploy_budget:
+            cmd.extend(['--budget', self.options.deploy_budget])
         return cmd
 
     def wait_cmd(self):
