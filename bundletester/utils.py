@@ -30,14 +30,17 @@ def find_testdir(directory):
 
 
 @contextmanager
-def juju_env(env):
-    orig_env = os.environ.get('JUJU_ENV', '')
+def juju_env(env, juju_major_version):
+    juju_model = 'JUJU_MODEL'
+    if juju_major_version == 1:
+        juju_model = 'JUJU_ENV'
+    orig_env = os.environ.get(juju_model, '')
     if env != orig_env:
-        log.debug('Updating JUJU_ENV: "%s" -> "%s"', orig_env, env)
-        os.environ['JUJU_ENV'] = env
+        log.debug('Updating %s: "%s" -> "%s"', juju_model, orig_env, env)
+        os.environ[juju_model] = env
     try:
         yield
     finally:
         if env != orig_env:
-            log.debug('Updating JUJU_ENV: "%s" -> "%s"', env, orig_env)
-            os.environ['JUJU_ENV'] = orig_env
+            log.debug('Updating %s: "%s" -> "%s"', juju_model, env, orig_env)
+            os.environ[juju_model] = orig_env
