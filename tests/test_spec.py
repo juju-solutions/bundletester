@@ -218,6 +218,15 @@ class TestDeployCommand(unittest.TestCase):
         self.assertEqual(cmd, ['juju', 'deploy', 'foo-bundle', '--plan', 'foo',
                                '--budget', 'bar'])
 
+    def test_deploy_cmd_env(self):
+        model = fake_model()
+        options = FakeOptions(juju_major_version=2)
+        options.environment = 'foo'
+
+        suite = spec.Suite(model, options)
+        cmd = suite._deploy_cmd('foo-bundle')
+        self.assertEqual(cmd, ['juju', 'deploy', 'foo-bundle', '-m', 'foo'])
+
 
 def fake_model():
     return models.Bundle({
@@ -233,6 +242,7 @@ class FakeOptions:
     deployment = None
     deploy_plan = None
     deploy_budget = None
+    environment = None
 
     def __init__(self, juju_major_version):
         self.juju_major_version = juju_major_version
