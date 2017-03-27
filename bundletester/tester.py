@@ -147,7 +147,8 @@ def main(options=None):
         run = runner.Runner(suite, options)
         report.header()
         if len(suite):
-            with utils.juju_env(options.environment):
+            with utils.juju_env(
+                    options.environment, options.juju_major_version):
                 [report.emit(result) for result in run()]
         report.summary()
         return_code = report.exit()

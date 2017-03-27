@@ -115,10 +115,14 @@ class Suite(list):
             cmd.append(self.options.deployment)
         if self.config.deployment_timeout is not None:
             cmd += ['-t', str(self.config.deployment_timeout)]
+        if self.options.environment:
+            cmd.extend(['-e', self.options.environment])
         return cmd
 
     def _deploy_cmd(self, bundle):
         cmd = ['juju', 'deploy', bundle]
+        if self.options.environment:
+            cmd.extend(['-m', self.options.environment])
         if self.options.deployment:
             cmd.append(self.options.deployment)
         if self.options.deploy_plan:
@@ -131,6 +135,8 @@ class Suite(list):
         if self.options.juju_major_version == 1:
             return None
         cmd = ['juju-wait', '-v']
+        if self.options.environment:
+            cmd.extend(['-m', self.options.environment])
         if self.config.deployment_timeout is not None:
             cmd.extend(['-t', str(self.config.deployment_timeout)])
         return cmd
