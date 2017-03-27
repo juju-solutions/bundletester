@@ -1,0 +1,27 @@
+name: bundletester
+version: "0.11.0"  # same value in VERSION file
+summary: A juju charm and bundle test runner
+description: |
+  This is designed around the fail fast principle. Each bundle is composed of
+  charms, each of those charms should have tests ranging from unit tests to
+  integration tests. The bundle itself will have integration tests. Those
+  tests should run from least expensive to most expensive in terms of time,
+  failing as soon as possible. The theory is that if tests fail in the charms,
+  the bundle cannot function. Bundletester will therefore pull all the charms
+  and look for any tests it can find and run those prior running its own
+  integration tests.  
+grade: devel
+confinement: classic
+apps:
+  bundletester:
+    command: bin/bundletester
+  bundlewatcher:
+    command: bin/bundlewatcher
+parts:
+  bundletester:
+    plugin: python
+    python-version: python2
+    source: ./
+    build-packages:
+      - python-dev
+      - build-essential
