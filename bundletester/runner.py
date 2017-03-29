@@ -201,13 +201,16 @@ class Runner(object):
             result.update(e.result)
         except KeyboardInterrupt:
             result['returncode'] = 1
+            result['exit'] = spec.executable
         except subprocess.CalledProcessError as e:
             result['returncode'] = e.returncode
             result['output'] = e.output
             result['executable'] = e.cmd
+            result['exit'] = spec.executable
         except Exception as e:
             log.exception(e)
             result['returncode'] = 1
+            result['exit'] = spec.executable
             result['output'] = '{}\n{}'.format(
                 result.get('output', ''), traceback.format_exc())
         finally:
