@@ -1,3 +1,4 @@
+import os
 import yaml
 
 
@@ -32,7 +33,6 @@ class Parser(dict):
         self.merge(parent)
         if kwargs:
             self.merge(kwargs)
-
         if path:
             data = yaml.safe_load(open(path, 'r').read())
             self.merge(data)
@@ -40,6 +40,8 @@ class Parser(dict):
             # Replace the default makefile targets
             if 'makefile' in data:
                 self.update(makefile=data['makefile'])
+        if os.environ.get("BUNDLE_DEPLOYMENT_TIMEOUT"):
+            self.deployment_timeout = os.environ["BUNDLE_DEPLOYMENT_TIMEOUT"]
 
     def __getattr__(self, key):
         return dict.get(self, key)
