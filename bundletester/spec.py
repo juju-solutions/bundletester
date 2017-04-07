@@ -139,6 +139,8 @@ class Suite(list):
             cmd.extend(['-m', self.options.environment])
         if self.config.deployment_timeout is not None:
             cmd.extend(['-t', str(self.config.deployment_timeout)])
+        else:
+            cmd.extend(['-t', os.getenv('JUJU_DEPLOYMENT_TIMEOUT', '5400')])
         return cmd
 
     def deploy_cmd(self):
