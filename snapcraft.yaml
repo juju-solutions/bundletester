@@ -10,7 +10,7 @@ description: |
   the bundle cannot function. Bundletester will therefore pull all the charms
   and look for any tests it can find and run those prior running its own
   integration tests.  
-grade: devel
+grade: stable
 confinement: classic
 apps:
   bundletester:
