@@ -8,4 +8,5 @@ nose
 requests<=2.9.1
 simplejson>=3.8.0
 websocket-client
-juju-wait
+# https://github.com/juju-solutions/bundletester/issues/102
+juju-wait==2.5.0
