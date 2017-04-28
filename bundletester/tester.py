@@ -83,6 +83,9 @@ def configure():
                         help='A plan to deploy charm under')
     parser.add_argument('--deploy-budget',
                         help='Deploy budget and allocation limit')
+    parser.add_argument('--no-chaos', action="store_true",
+                        help="Skip matrix test run, even if juju-matrix is "
+                        "in your path.")
     options = parser.parse_args()
 
     if options.version:
