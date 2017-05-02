@@ -268,8 +268,10 @@ class Suite(list):
         if self.options.juju_major_version < 2:
             # matrix currently requires Juju 2.0+
             return
+        if self.options.no_matrix:
+            return
         try:
-            subprocess.call(['matrix', '--help'],
+            subprocess.call(['juju-matrix', '--help'],
                             stdout=open('/dev/null', 'w'),
                             stderr=subprocess.STDOUT)
         except OSError as e:
@@ -277,8 +279,8 @@ class Suite(list):
                 raise
         else:
             controller, _ = self.options.environment.split(':')
-            self.spec(['matrix', '-s', 'raw', '-c', controller],
-                      name='matrix', dirname=dirname)
+            self.spec(['juju-matrix', '-s', 'raw', '-c', controller],
+                      name='juju-matrix', dirname=dirname)
 
     def find_implicit_tests(self):
         # Look for implicit targets and map these as tests
