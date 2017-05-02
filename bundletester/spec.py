@@ -268,7 +268,7 @@ class Suite(list):
         if self.options.juju_major_version < 2:
             # matrix currently requires Juju 2.0+
             return
-        if self.options.no_chaos:
+        if self.options.no_matrix:
             return
         try:
             subprocess.call(['juju-matrix', '--help'],
