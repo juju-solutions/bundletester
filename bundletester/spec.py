@@ -311,6 +311,8 @@ def filter_yamls(yamls):
 
     result = []
     for yamlfn in yamls:
+        if yamlfn.endswith('metrics.yaml'):
+            continue
         data = yaml.safe_load(open(yamlfn))
         if not isinstance(data, dict):
             continue
