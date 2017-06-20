@@ -7,6 +7,7 @@ mock
 nose
 requests<=2.9.1
 simplejson>=3.8.0
-websocket-client
+# https://github.com/juju-solutions/bundletester/issues/108
+websocket-client<=0.40.0
 # https://github.com/juju-solutions/bundletester/issues/102
 juju-wait==2.5.0
